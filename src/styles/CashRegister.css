@@ -1,0 +1,596 @@
+/* =========================
+   CASH GENERAL
+========================= */
+
+.cash-page {
+  padding-bottom: 36px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.cash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #111827 0%, #1f2937 45%, #2563eb 100%);
+  color: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.cash-header::before {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -70px;
+  top: -90px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+}
+
+.cash-header::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: 120px;
+  bottom: -95px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+.cash-title {
+  position: relative;
+  z-index: 1;
+}
+
+.cash-title h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 6px;
+  letter-spacing: -0.8px;
+}
+
+.cash-title p {
+  color: #dbeafe;
+  margin-bottom: 0;
+  font-size: 15px;
+}
+
+.cash-header-actions {
+  display: flex;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.cash-action-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-weight: 800;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  transition: all 0.22s ease;
+}
+
+.cash-action-btn:hover {
+  background: #f8fafc;
+  color: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.24);
+}
+
+/* =========================
+   CARDS RESUMEN
+========================= */
+
+.cash-summary-card {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  height: 100%;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.cash-summary-card::before {
+  content: "";
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  right: -45px;
+  top: -45px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.08);
+  transition: all 0.25s ease;
+}
+
+.cash-summary-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.14);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.cash-summary-card:hover::before {
+  transform: scale(1.18);
+}
+
+.cash-summary-body {
+  padding: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.cash-summary-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  font-size: 25px;
+}
+
+.cash-summary-icon.blue {
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  color: #2563eb;
+}
+
+.cash-summary-icon.green {
+  background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  color: #16a34a;
+}
+
+.cash-summary-icon.yellow {
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  color: #d97706;
+}
+
+.cash-summary-icon.red {
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  color: #dc2626;
+}
+
+.cash-summary-label {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.cash-summary-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0;
+  letter-spacing: -0.8px;
+}
+
+/* =========================
+   CARDS PRINCIPALES
+========================= */
+
+.cash-current-card,
+.cash-form-card,
+.cash-history-card {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.cash-current-card .card-body,
+.cash-form-card .card-body,
+.cash-history-card .card-body {
+  padding: 26px;
+}
+
+.cash-section-header h5,
+.cash-form-card h5,
+.cash-toolbar h5 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.cash-section-header p,
+.cash-form-card p,
+.cash-toolbar p {
+  color: #64748b;
+  margin-bottom: 0;
+}
+
+/* =========================
+   CAJA ACTUAL
+========================= */
+
+.cash-current-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  padding: 20px;
+}
+
+.cash-current-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #111827, #2563eb);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+  box-shadow: 0 12px 25px rgba(37, 99, 235, 0.25);
+}
+
+.cash-current-status h5 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.cash-current-status p {
+  color: #64748b;
+  margin-bottom: 0;
+  line-height: 1.45;
+}
+
+.cash-info-box {
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 18px;
+  height: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  transition: all 0.22s ease;
+}
+
+.cash-info-box:hover {
+  transform: translateY(-3px);
+  border-color: #bfdbfe;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+}
+
+.cash-info-box span {
+  display: block;
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.cash-info-box strong {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* =========================
+   ESTADO VACÍO
+========================= */
+
+.cash-empty-state {
+  text-align: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px dashed #cbd5e1;
+  border-radius: 24px;
+  padding: 38px 22px;
+}
+
+.cash-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  margin: 0 auto 18px;
+}
+
+.cash-empty-state h5 {
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.cash-empty-state p {
+  color: #64748b;
+  margin-bottom: 18px;
+}
+
+/* =========================
+   FORMULARIOS
+========================= */
+
+.cash-form-card .form-label {
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.cash-form-card .form-control {
+  border-radius: 14px;
+  padding: 11px 14px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  transition: all 0.22s ease;
+}
+
+.cash-form-card .form-control:focus {
+  background-color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.cash-form-card .btn {
+  border-radius: 14px;
+  font-weight: 800;
+  padding: 10px 16px;
+}
+
+.cash-close-info {
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 18px;
+  margin: 20px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cash-close-info span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.cash-close-info strong {
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* =========================
+   TOOLBAR HISTORIAL
+========================= */
+
+.cash-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  gap: 16px;
+}
+
+.cash-search {
+  max-width: 390px;
+  width: 100%;
+}
+
+.cash-search .input-group-text {
+  border-radius: 16px 0 0 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.cash-search input {
+  border-radius: 0 16px 16px 0;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  transition: all 0.22s ease;
+}
+
+.cash-search input:focus {
+  background: #ffffff;
+  border-color: #2563eb;
+  box-shadow: none;
+}
+
+/* =========================
+   TABLA
+========================= */
+
+.cash-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid #eef2f7;
+}
+
+.cash-table {
+  margin-bottom: 0;
+}
+
+.cash-table thead th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 15px 16px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.cash-table tbody td {
+  padding: 15px 16px;
+  vertical-align: middle;
+  color: #0f172a;
+  white-space: nowrap;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cash-table tbody tr {
+  transition: all 0.18s ease;
+}
+
+.cash-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.cash-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================
+   BADGES
+========================= */
+
+.cash-status-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cash-status-badge.open {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.cash-status-badge.closed {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.cash-status-badge.default {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.cash-difference-ok {
+  color: #166534;
+  font-weight: 800;
+}
+
+.cash-difference-bad {
+  color: #991b1b;
+  font-weight: 800;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 992px) {
+  .cash-header {
+    padding: 22px;
+  }
+
+  .cash-title h1 {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cash-page {
+    padding-bottom: 24px;
+  }
+
+  .cash-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    border-radius: 22px;
+    margin-bottom: 22px;
+  }
+
+  .cash-title h1 {
+    font-size: 29px;
+  }
+
+  .cash-title p {
+    font-size: 14px;
+  }
+
+  .cash-header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .cash-action-btn {
+    width: 100%;
+    border-radius: 16px;
+  }
+
+  .cash-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cash-search {
+    max-width: 100%;
+  }
+
+  .cash-current-status {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cash-close-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .cash-current-card .card-body,
+  .cash-form-card .card-body,
+  .cash-history-card .card-body {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cash-header {
+    padding: 20px;
+  }
+
+  .cash-title h1 {
+    font-size: 27px;
+  }
+
+  .cash-summary-body {
+    padding: 22px;
+  }
+
+  .cash-summary-value {
+    font-size: 30px;
+  }
+
+  .cash-empty-state {
+    padding: 32px 18px;
+  }
+
+  .cash-empty-icon {
+    width: 58px;
+    height: 58px;
+  }
+}

@@ -1,0 +1,557 @@
+/* =========================
+   MOVEMENTS GENERAL
+========================= */
+
+.movements-page {
+  padding-bottom: 36px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.movements-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #111827 0%, #1f2937 45%, #2563eb 100%);
+  color: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.movements-header::before {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -70px;
+  top: -90px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+}
+
+.movements-header::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: 120px;
+  bottom: -95px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+.movements-title {
+  position: relative;
+  z-index: 1;
+}
+
+.movements-title h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 6px;
+  letter-spacing: -0.8px;
+}
+
+.movements-title p {
+  color: #dbeafe;
+  margin-bottom: 0;
+  font-size: 15px;
+}
+
+.movements-new-btn {
+  position: relative;
+  z-index: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-weight: 800;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  transition: all 0.22s ease;
+}
+
+.movements-new-btn:hover {
+  background: #f8fafc;
+  color: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.24);
+}
+
+.movements-new-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
+/* =========================
+   CARDS RESUMEN
+========================= */
+
+.movements-summary-card {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  height: 100%;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.movements-summary-card::before {
+  content: "";
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  right: -45px;
+  top: -45px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.08);
+  transition: all 0.25s ease;
+}
+
+.movements-summary-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.14);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.movements-summary-card:hover::before {
+  transform: scale(1.18);
+}
+
+.movements-summary-body {
+  padding: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.movements-summary-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  font-size: 25px;
+}
+
+.movements-summary-icon.blue {
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  color: #2563eb;
+}
+
+.movements-summary-icon.green {
+  background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  color: #16a34a;
+}
+
+.movements-summary-icon.yellow {
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  color: #d97706;
+}
+
+.movements-summary-icon.red {
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  color: #dc2626;
+}
+
+.movements-summary-label {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.movements-summary-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0;
+  letter-spacing: -0.8px;
+}
+
+/* =========================
+   CARDS PRINCIPALES
+========================= */
+
+.movements-current-card,
+.movements-form-card,
+.movements-history-card {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.movements-current-card .card-body,
+.movements-form-card .card-body,
+.movements-history-card .card-body {
+  padding: 26px;
+}
+
+.movements-section-header h5,
+.movements-form-card h5,
+.movements-toolbar h5 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.movements-section-header p,
+.movements-form-card p,
+.movements-toolbar p {
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+/* =========================
+   INFO BOX
+========================= */
+
+.movement-info-box {
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 18px;
+  height: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  transition: all 0.22s ease;
+}
+
+.movement-info-box:hover {
+  transform: translateY(-3px);
+  border-color: #bfdbfe;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+}
+
+.movement-info-box span {
+  display: block;
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.movement-info-box strong {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* =========================
+   SIN CAJA ABIERTA / WARNING
+========================= */
+
+.movement-warning-card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
+  border: 1px solid #fed7aa;
+  color: #92400e;
+  border-radius: 22px;
+  padding: 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 28px rgba(234, 88, 12, 0.08);
+}
+
+.movement-warning-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 18px;
+  background: #ffedd5;
+  color: #ea580c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+}
+
+.movement-warning-card h5 {
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.movement-warning-card p {
+  margin-bottom: 0;
+  line-height: 1.45;
+}
+
+/* =========================
+   FORMULARIO
+========================= */
+
+.movements-form-card .form-label {
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.movements-form-card .form-control,
+.movements-form-card .form-select {
+  border-radius: 14px;
+  padding: 11px 14px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  transition: all 0.22s ease;
+}
+
+.movements-form-card .form-control:focus,
+.movements-form-card .form-select:focus {
+  background-color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.movements-form-card .btn {
+  border-radius: 14px;
+  font-weight: 800;
+  padding: 10px 16px;
+}
+
+/* =========================
+   TOOLBAR
+========================= */
+
+.movements-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  gap: 16px;
+}
+
+.movements-toolbar p {
+  margin-bottom: 0;
+}
+
+.movements-search {
+  max-width: 390px;
+  width: 100%;
+}
+
+.movements-search .input-group-text {
+  border-radius: 16px 0 0 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.movements-search input {
+  border-radius: 0 16px 16px 0;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  transition: all 0.22s ease;
+}
+
+.movements-search input:focus {
+  background: #ffffff;
+  border-color: #2563eb;
+  box-shadow: none;
+}
+
+/* =========================
+   TABLA
+========================= */
+
+.movements-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid #eef2f7;
+}
+
+.movements-table {
+  margin-bottom: 0;
+}
+
+.movements-table thead th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 15px 16px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.movements-table tbody td {
+  padding: 15px 16px;
+  vertical-align: middle;
+  color: #0f172a;
+  white-space: nowrap;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.movements-table tbody tr {
+  transition: all 0.18s ease;
+}
+
+.movements-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.movements-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.movement-description {
+  font-weight: 700;
+  color: #0f172a;
+  max-width: 260px;
+  white-space: normal;
+}
+
+/* =========================
+   BADGES
+========================= */
+
+.movement-type-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.movement-type-badge.income {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.movement-type-badge.expense {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.movement-type-badge.sale {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.movement-type-badge.refund {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.movement-type-badge.default {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* =========================
+   MONTO
+========================= */
+
+.movement-amount {
+  font-weight: 800;
+}
+
+.movement-amount.income {
+  color: #166534;
+}
+
+.movement-amount.expense {
+  color: #991b1b;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 992px) {
+  .movements-header {
+    padding: 22px;
+  }
+
+  .movements-title h1 {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .movements-page {
+    padding-bottom: 24px;
+  }
+
+  .movements-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    border-radius: 22px;
+    margin-bottom: 22px;
+  }
+
+  .movements-title h1 {
+    font-size: 29px;
+  }
+
+  .movements-title p {
+    font-size: 14px;
+  }
+
+  .movements-new-btn {
+    width: 100%;
+    border-radius: 16px;
+  }
+
+  .movements-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .movements-search {
+    max-width: 100%;
+  }
+
+  .movement-warning-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .movements-current-card .card-body,
+  .movements-form-card .card-body,
+  .movements-history-card .card-body {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .movements-header {
+    padding: 20px;
+  }
+
+  .movements-title h1 {
+    font-size: 27px;
+  }
+
+  .movements-summary-body {
+    padding: 22px;
+  }
+
+  .movements-summary-value {
+    font-size: 30px;
+  }
+
+  .movement-warning-icon {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+  }
+}

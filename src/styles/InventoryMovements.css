@@ -1,0 +1,545 @@
+/* =========================
+   INVENTORY GENERAL
+========================= */
+
+.inventory-page {
+  padding-bottom: 36px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #111827 0%, #1f2937 45%, #2563eb 100%);
+  color: #ffffff;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
+  position: relative;
+  overflow: hidden;
+}
+
+.inventory-header::before {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  right: -70px;
+  top: -90px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+}
+
+.inventory-header::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: 120px;
+  bottom: -95px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+.inventory-title {
+  position: relative;
+  z-index: 1;
+}
+
+.inventory-title h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 6px;
+  letter-spacing: -0.8px;
+}
+
+.inventory-title p {
+  color: #dbeafe;
+  margin-bottom: 0;
+  font-size: 15px;
+}
+
+.inventory-new-btn {
+  position: relative;
+  z-index: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  font-weight: 800;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  transition: all 0.22s ease;
+}
+
+.inventory-new-btn:hover {
+  background: #f8fafc;
+  color: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.24);
+}
+
+/* =========================
+   CARDS RESUMEN
+========================= */
+
+.inventory-summary-card {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  height: 100%;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.inventory-summary-card::before {
+  content: "";
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  right: -45px;
+  top: -45px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.08);
+  transition: all 0.25s ease;
+}
+
+.inventory-summary-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.14);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.inventory-summary-card:hover::before {
+  transform: scale(1.18);
+}
+
+.inventory-summary-body {
+  padding: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.inventory-summary-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  font-size: 25px;
+}
+
+.inventory-summary-icon.blue {
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  color: #2563eb;
+}
+
+.inventory-summary-icon.green {
+  background: linear-gradient(135deg, #dcfce7, #f0fdf4);
+  color: #16a34a;
+}
+
+.inventory-summary-icon.yellow {
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  color: #d97706;
+}
+
+.inventory-summary-icon.red {
+  background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  color: #dc2626;
+}
+
+.inventory-summary-label {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.inventory-summary-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0;
+  letter-spacing: -0.8px;
+}
+
+/* =========================
+   FORMULARIO
+========================= */
+
+.inventory-form-card {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.inventory-form-card .card-body {
+  padding: 26px;
+}
+
+.inventory-form-card h5 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.inventory-form-card p {
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.inventory-form-card .form-label {
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.inventory-form-card .form-control,
+.inventory-form-card .form-select {
+  border-radius: 14px;
+  padding: 11px 14px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  transition: all 0.22s ease;
+}
+
+.inventory-form-card .form-control:focus,
+.inventory-form-card .form-select:focus {
+  background-color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.inventory-form-card .btn {
+  border-radius: 14px;
+  font-weight: 800;
+  padding: 10px 16px;
+}
+
+/* =========================
+   ALERTA PRODUCTO
+========================= */
+
+.inventory-product-alert {
+  display: grid;
+  grid-template-columns: 1fr 160px 160px;
+  gap: 12px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.inventory-product-alert span {
+  display: block;
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.inventory-product-alert strong {
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+/* =========================
+   CARD TABLA
+========================= */
+
+.inventory-card {
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.inventory-card .card-body {
+  padding: 26px;
+}
+
+/* =========================
+   TOOLBAR
+========================= */
+
+.inventory-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  gap: 16px;
+}
+
+.inventory-toolbar h5 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.inventory-toolbar p {
+  color: #64748b;
+  margin-bottom: 0;
+}
+
+.inventory-search {
+  max-width: 390px;
+  width: 100%;
+}
+
+.inventory-search .input-group-text {
+  border-radius: 16px 0 0 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.inventory-search input {
+  border-radius: 0 16px 16px 0;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  transition: all 0.22s ease;
+}
+
+.inventory-search input:focus {
+  background: #ffffff;
+  border-color: #2563eb;
+  box-shadow: none;
+}
+
+/* =========================
+   FILTROS
+========================= */
+
+.inventory-filters {
+  display: grid;
+  grid-template-columns: 240px auto;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.inventory-filters .form-select {
+  border-radius: 14px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  height: 45px;
+  font-size: 14px;
+  transition: all 0.22s ease;
+}
+
+.inventory-filters .form-select:focus {
+  background-color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.inventory-clear-btn {
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-weight: 800;
+  white-space: nowrap;
+  height: 45px;
+  width: fit-content;
+}
+
+/* =========================
+   TABLA
+========================= */
+
+.inventory-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid #eef2f7;
+}
+
+.inventory-table {
+  margin-bottom: 0;
+}
+
+.inventory-table thead th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 15px 16px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.inventory-table tbody td {
+  padding: 15px 16px;
+  vertical-align: middle;
+  color: #0f172a;
+  white-space: nowrap;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.inventory-table tbody tr {
+  transition: all 0.18s ease;
+}
+
+.inventory-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.inventory-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.inventory-product-name {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.inventory-reason {
+  max-width: 260px;
+  white-space: normal;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* =========================
+   BADGES
+========================= */
+
+.inventory-type-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.inventory-type-badge.purchase {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.inventory-type-badge.sale {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.inventory-type-badge.adjustment {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.inventory-type-badge.return {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.inventory-type-badge.default {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 992px) {
+  .inventory-header {
+    padding: 22px;
+  }
+
+  .inventory-title h1 {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .inventory-page {
+    padding-bottom: 24px;
+  }
+
+  .inventory-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    border-radius: 22px;
+    margin-bottom: 22px;
+  }
+
+  .inventory-title h1 {
+    font-size: 29px;
+  }
+
+  .inventory-title p {
+    font-size: 14px;
+  }
+
+  .inventory-new-btn {
+    width: 100%;
+    border-radius: 16px;
+  }
+
+  .inventory-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .inventory-search {
+    max-width: 100%;
+  }
+
+  .inventory-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-clear-btn {
+    width: 100%;
+  }
+
+  .inventory-product-alert {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-form-card .card-body,
+  .inventory-card .card-body {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inventory-header {
+    padding: 20px;
+  }
+
+  .inventory-title h1 {
+    font-size: 27px;
+  }
+
+  .inventory-summary-body {
+    padding: 22px;
+  }
+
+  .inventory-summary-value {
+    font-size: 30px;
+  }
+}

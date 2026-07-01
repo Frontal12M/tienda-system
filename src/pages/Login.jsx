@@ -33,12 +33,13 @@ function Login() {
 
       const userData = data.responseObject || data;
 
+      localStorage.setItem("authData", JSON.stringify(userData));
       localStorage.setItem("user", JSON.stringify(userData));
-
+      
       if (userData.token) {
         localStorage.setItem("token", userData.token);
       }
-
+      
       navigate("/dashboard");
     } catch (error) {
       console.error("Error en login:", error);

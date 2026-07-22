@@ -302,14 +302,14 @@ function Dashboard() {
                   {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
                     <>
                       <Link
-                        to={routes.movimientosCaja}
+                        to={`${routes.movimientosCaja}?type=EXPENSE&description=Pago%20a%20proveedor`}
                         className="quick-action-btn"
                       >
                         Pago a proveedor
                       </Link>
 
                       <Link
-                        to={routes.movimientosCaja}
+                        to={`${routes.movimientosCaja}?type=INCOME&description=Entrada%20de%20efectivo`}
                         className="quick-action-btn"
                       >
                         Entrada de efectivo

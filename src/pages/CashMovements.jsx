@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import {
   createCashMovement,
@@ -18,6 +19,8 @@ import {
 import "../styles/CashMovements.css";
 
 function CashMovements() {
+  const location = useLocation();
+
   const [movements, setMovements] = useState([]);
   const [openRegister, setOpenRegister] = useState(null);
 
@@ -105,6 +108,25 @@ function CashMovements() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    const type = params.get("type");
+    const description = params.get("description");
+
+    if (type || description) {
+      setFormData({
+        type: type || "INCOME",
+        description: description || "",
+        amount: "",
+      });
+
+      setShowForm(true);
+      setError("");
+      setSuccess("");
+    }
+  }, [location.search]);
+
   const resetForm = () => {
     setFormData(initialFormData);
   };
@@ -165,7 +187,35 @@ function CashMovements() {
       return <span className="movement-type-badge refund">Devolución</span>;
     }
 
-    return <span className="movement-type-badge default">{type || "Sin tipo"}</span>;
+    return (
+      <span className="movement-type-badge default">
+        {type || "Sin tipo"}
+      </span>
+    );
+  };
+
+  const getFormTitle = () => {
+    if (formData.type === "EXPENSE") {
+      return "Registrar salida de efectivo";
+    }
+
+    if (formData.type === "INCOME") {
+      return "Registrar entrada de efectivo";
+    }
+
+    return "Nuevo movimiento";
+  };
+
+  const getFormDescription = () => {
+    if (formData.type === "EXPENSE") {
+      return "Registra un pago a proveedor, retiro o salida manual de caja.";
+    }
+
+    if (formData.type === "INCOME") {
+      return "Registra una entrada manual de efectivo a la caja.";
+    }
+
+    return "Registra una entrada o salida manual de efectivo.";
   };
 
   const handleSubmit = async (e) => {
@@ -195,7 +245,7 @@ function CashMovements() {
 
       const cashMovementToSave = {
         type: formData.type,
-        description: formData.description,
+        description: formData.description.trim(),
         amount: Number(formData.amount),
         cashRegister: {
           id: openRegister.id,
@@ -242,8 +292,9 @@ function CashMovements() {
   const balance = totalIncome - totalExpense;
 
   const filteredMovements = movements.filter((movement) => {
-    const text = `${movement.id} ${movement.type || ""} ${movement.description || ""
-      } ${movement.userName || ""} ${movement.saleFolio || ""}`.toLowerCase();
+    const text = `${movement.id} ${movement.type || ""} ${
+      movement.description || ""
+    } ${movement.userName || ""} ${movement.saleFolio || ""}`.toLowerCase();
 
     return text.includes(searchTerm.toLowerCase());
   });
@@ -372,14 +423,18 @@ function CashMovements() {
                 <div className="col-12 col-md-3">
                   <div className="movement-info-box">
                     <span>Monto inicial</span>
-                    <strong>{formatCurrency(openRegister.openingAmount)}</strong>
+                    <strong>
+                      {formatCurrency(openRegister.openingAmount)}
+                    </strong>
                   </div>
                 </div>
 
                 <div className="col-12 col-md-3">
                   <div className="movement-info-box">
                     <span>Monto esperado</span>
-                    <strong>{formatCurrency(openRegister.expectedAmount)}</strong>
+                    <strong>
+                      {formatCurrency(openRegister.expectedAmount)}
+                    </strong>
                   </div>
                 </div>
 
@@ -397,8 +452,8 @@ function CashMovements() {
         {showForm && openRegister && (
           <div className="card movements-form-card mb-4">
             <div className="card-body">
-              <h5>Nuevo movimiento</h5>
-              <p>Registra una entrada o salida manual de efectivo.</p>
+              <h5>{getFormTitle()}</h5>
+              <p>{getFormDescription()}</p>
 
               <form onSubmit={handleSubmit}>
                 <div className="row">
@@ -428,6 +483,7 @@ function CashMovements() {
                       min="0"
                       step="0.01"
                       required
+                      autoFocus
                     />
                   </div>
 
@@ -458,10 +514,18 @@ function CashMovements() {
                 <div className="d-flex gap-2">
                   <button
                     type="submit"
-                    className="btn btn-success"
+                    className={
+                      formData.type === "EXPENSE"
+                        ? "btn btn-danger"
+                        : "btn btn-success"
+                    }
                     disabled={saving}
                   >
-                    {saving ? "Guardando..." : "Guardar movimiento"}
+                    {saving
+                      ? "Guardando..."
+                      : formData.type === "EXPENSE"
+                      ? "Guardar salida"
+                      : "Guardar entrada"}
                   </button>
 
                   <button
@@ -568,8 +632,8 @@ function CashMovements() {
                             {movement.saleFolio
                               ? movement.saleFolio
                               : movement.saleId
-                                ? `Venta #${movement.saleId}`
-                                : "No aplica"}
+                              ? `Venta #${movement.saleId}`
+                              : "No aplica"}
                           </td>
 
                           <td>{formatDate(movement.createdAt)}</td>

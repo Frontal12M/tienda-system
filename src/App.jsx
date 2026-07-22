@@ -15,14 +15,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<Login />} />
 
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN", "CASHIER"]}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -31,7 +31,7 @@ function App() {
         <Route
           path="/categories"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN"]}>
               <Categories />
             </ProtectedRoute>
           }
@@ -40,7 +40,7 @@ function App() {
         <Route
           path="/products"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN", "CASHIER"]}>
               <Products />
             </ProtectedRoute>
           }
@@ -49,7 +49,7 @@ function App() {
         <Route
           path="/inventory"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN"]}>
               <InventoryMovements />
             </ProtectedRoute>
           }
@@ -58,7 +58,7 @@ function App() {
         <Route
           path="/sales"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN", "CASHIER"]}>
               <Sales />
             </ProtectedRoute>
           }
@@ -67,7 +67,7 @@ function App() {
         <Route
           path="/cash-register"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN", "CASHIER"]}>
               <CashRegister />
             </ProtectedRoute>
           }
@@ -76,7 +76,7 @@ function App() {
         <Route
           path="/cash-movements"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN", "CASHIER"]}>
               <CashMovements />
             </ProtectedRoute>
           }
@@ -85,7 +85,7 @@ function App() {
         <Route
           path="/reports"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN"]}>
               <Reports />
             </ProtectedRoute>
           }
@@ -94,13 +94,13 @@ function App() {
         <Route
           path="/users"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["OWNER", "ADMIN"]}>
               <Users />
             </ProtectedRoute>
           }
         />
 
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   );

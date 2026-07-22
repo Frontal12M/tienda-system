@@ -13,9 +13,17 @@ import {
 import "../styles/Dashboard.css";
 
 function Dashboard() {
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const authData = JSON.parse(localStorage.getItem("authData")) || {};
+  const user = authData || JSON.parse(localStorage.getItem("user")) || {};
+  const userRole = user?.role;
 
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState({
+    totalCategories: 0,
+    totalProducts: 0,
+    totalSales: 0,
+    totalUsers: 0,
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -30,10 +38,24 @@ function Dashboard() {
     movimientosCaja: "/cash-movements",
   };
 
+  const canSee = (roles) => {
+    return roles.includes(userRole);
+  };
+
   const loadDashboard = async () => {
     try {
       setLoading(true);
       setError("");
+
+      if (userRole === "CASHIER") {
+        setStats({
+          totalCategories: 0,
+          totalProducts: 0,
+          totalSales: 0,
+          totalUsers: 0,
+        });
+        return;
+      }
 
       const data = await getDashboardStats();
 
@@ -65,7 +87,11 @@ function Dashboard() {
         <div className="dashboard-header">
           <div className="dashboard-title">
             <h1>Dashboard</h1>
-            <p>Resumen general del sistema de tienda.</p>
+            <p>
+              {userRole === "CASHIER"
+                ? "Accesos rápidos para operación de caja y ventas."
+                : "Resumen general del sistema de tienda."}
+            </p>
           </div>
 
           <div className="dashboard-date">{currentDate}</div>
@@ -75,9 +101,18 @@ function Dashboard() {
           <div className="alert alert-info">Cargando información...</div>
         )}
 
-        {error && <div className="alert alert-danger">{error}</div>}
+        {error && userRole !== "CASHIER" && (
+          <div className="alert alert-danger">{error}</div>
+        )}
 
-        {!loading && !error && (
+        {!loading && userRole === "CASHIER" && (
+          <div className="alert alert-info">
+            Sesión de cajero activa. Puedes registrar ventas, consultar productos,
+            revisar caja y movimientos de caja.
+          </div>
+        )}
+
+        {!loading && !error && canSee(["OWNER", "ADMIN"]) && (
           <div className="row g-4">
             <div className="col-12 col-sm-6 col-lg-3">
               <Link to={routes.categorias} className="dashboard-card-link">
@@ -153,6 +188,55 @@ function Dashboard() {
           </div>
         )}
 
+        {!loading && userRole === "CASHIER" && (
+          <div className="row g-4">
+            <div className="col-12 col-sm-6 col-lg-4">
+              <Link to={routes.ventas} className="dashboard-card-link">
+                <div className="dashboard-card">
+                  <div className="dashboard-card-body">
+                    <div className="dashboard-icon yellow">
+                      <FaCashRegister />
+                    </div>
+
+                    <p className="dashboard-card-label">Nueva venta</p>
+                    <h3 className="dashboard-card-value">POS</h3>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
+            <div className="col-12 col-sm-6 col-lg-4">
+              <Link to={routes.productos} className="dashboard-card-link">
+                <div className="dashboard-card">
+                  <div className="dashboard-card-body">
+                    <div className="dashboard-icon green">
+                      <FaBoxOpen />
+                    </div>
+
+                    <p className="dashboard-card-label">Productos</p>
+                    <h3 className="dashboard-card-value">Ver</h3>
+                  </div>
+                </div>
+              </Link>
+            </div>
+
+            <div className="col-12 col-sm-6 col-lg-4">
+              <Link to={routes.caja} className="dashboard-card-link">
+                <div className="dashboard-card">
+                  <div className="dashboard-card-body">
+                    <div className="dashboard-icon blue">
+                      <FaStore />
+                    </div>
+
+                    <p className="dashboard-card-label">Caja</p>
+                    <h3 className="dashboard-card-value">Abrir</h3>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div className="row g-4 mt-1">
           <div className="col-12 col-lg-7">
             <div className="card dashboard-section-card">
@@ -189,25 +273,46 @@ function Dashboard() {
                 <h5 className="dashboard-section-title">Accesos rápidos</h5>
 
                 <div className="quick-actions">
-                  <Link to={routes.ventas} className="quick-action-btn">
-                    Registrar venta
-                  </Link>
+                  {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+                    <Link to={routes.ventas} className="quick-action-btn">
+                      Registrar venta
+                    </Link>
+                  )}
 
-                  <Link to={routes.productos} className="quick-action-btn">
-                    Administrar productos
-                  </Link>
+                  {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+                    <Link to={routes.productos} className="quick-action-btn">
+                      {userRole === "CASHIER"
+                        ? "Consultar productos"
+                        : "Administrar productos"}
+                    </Link>
+                  )}
 
-                  <Link to={routes.inventario} className="quick-action-btn">
-                    Ver inventario
-                  </Link>
+                  {canSee(["OWNER", "ADMIN"]) && (
+                    <Link to={routes.inventario} className="quick-action-btn">
+                      Ver inventario
+                    </Link>
+                  )}
 
-                  <Link to={routes.reportes} className="quick-action-btn">
-                    Ver reportes
-                  </Link>
+                  {canSee(["OWNER", "ADMIN"]) && (
+                    <Link to={routes.reportes} className="quick-action-btn">
+                      Ver reportes
+                    </Link>
+                  )}
 
-                  <Link to={routes.movimientosCaja} className="quick-action-btn">
-                    Movimientos de caja
-                  </Link>
+                  {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+                    <Link
+                      to={routes.movimientosCaja}
+                      className="quick-action-btn"
+                    >
+                      Movimientos de caja
+                    </Link>
+                  )}
+
+                  {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+                    <Link to={routes.caja} className="quick-action-btn">
+                      Ir a caja
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
@@ -242,10 +347,12 @@ function Dashboard() {
                     <strong>Pendiente de validar</strong>
                   </div>
 
-                  <div className="summary-item">
-                    <span>Ventas registradas</span>
-                    <strong>{stats?.totalSales ?? 0}</strong>
-                  </div>
+                  {canSee(["OWNER", "ADMIN"]) && (
+                    <div className="summary-item">
+                      <span>Ventas registradas</span>
+                      <strong>{stats?.totalSales ?? 0}</strong>
+                    </div>
+                  )}
 
                   <div className="summary-item">
                     <span>Módulo</span>
@@ -256,43 +363,95 @@ function Dashboard() {
             </div>
           </div>
 
-          <div className="col-12 col-lg-6">
-            <div className="card dashboard-section-card">
-              <div className="card-body">
-                <h5 className="dashboard-section-title">Resumen del sistema</h5>
+          {canSee(["OWNER", "ADMIN"]) && (
+            <div className="col-12 col-lg-6">
+              <div className="card dashboard-section-card">
+                <div className="card-body">
+                  <h5 className="dashboard-section-title">
+                    Resumen del sistema
+                  </h5>
 
-                <div className="dashboard-status-box">
-                  <div className="dashboard-status-icon">
-                    <FaChartLine />
+                  <div className="dashboard-status-box">
+                    <div className="dashboard-status-icon">
+                      <FaChartLine />
+                    </div>
+
+                    <div>
+                      <p className="dashboard-status-title">
+                        Actividad general
+                      </p>
+                      <p className="dashboard-status-text">
+                        Información rápida de los módulos principales de la
+                        tienda.
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="dashboard-status-title">Actividad general</p>
-                    <p className="dashboard-status-text">
-                      Información rápida de los módulos principales de la tienda.
-                    </p>
-                  </div>
-                </div>
+                  <div className="summary-list">
+                    <div className="summary-item">
+                      <span>Productos registrados</span>
+                      <strong>{stats?.totalProducts ?? 0}</strong>
+                    </div>
 
-                <div className="summary-list">
-                  <div className="summary-item">
-                    <span>Productos registrados</span>
-                    <strong>{stats?.totalProducts ?? 0}</strong>
-                  </div>
+                    <div className="summary-item">
+                      <span>Categorías registradas</span>
+                      <strong>{stats?.totalCategories ?? 0}</strong>
+                    </div>
 
-                  <div className="summary-item">
-                    <span>Categorías registradas</span>
-                    <strong>{stats?.totalCategories ?? 0}</strong>
-                  </div>
-
-                  <div className="summary-item">
-                    <span>Usuarios registrados</span>
-                    <strong>{stats?.totalUsers ?? 0}</strong>
+                    <div className="summary-item">
+                      <span>Usuarios registrados</span>
+                      <strong>{stats?.totalUsers ?? 0}</strong>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {userRole === "CASHIER" && (
+            <div className="col-12 col-lg-6">
+              <div className="card dashboard-section-card">
+                <div className="card-body">
+                  <h5 className="dashboard-section-title">
+                    Operación del cajero
+                  </h5>
+
+                  <div className="dashboard-status-box">
+                    <div className="dashboard-status-icon">
+                      <FaCashRegister />
+                    </div>
+
+                    <div>
+                      <p className="dashboard-status-title">
+                        Punto de venta
+                      </p>
+                      <p className="dashboard-status-text">
+                        Desde aquí puedes vender, consultar productos y revisar
+                        caja.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="summary-list">
+                    <div className="summary-item">
+                      <span>Acceso principal</span>
+                      <strong>Ventas</strong>
+                    </div>
+
+                    <div className="summary-item">
+                      <span>Permiso</span>
+                      <strong>Cajero</strong>
+                    </div>
+
+                    <div className="summary-item">
+                      <span>Reportes</span>
+                      <strong>No disponible</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </MainLayout>

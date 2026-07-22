@@ -17,12 +17,13 @@ import {
   FaTrash,
   FaEye,
 } from "react-icons/fa";
+import { getOpenCashRegister } from "../services/cashRegisterService";
 import "../styles/Sales.css";
 
 function Sales() {
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
-
+  const [openRegister, setOpenRegister] = useState(null);
   const initialFormData = {
     userId: "1",
     amountReceived: "",
@@ -77,9 +78,28 @@ function Sales() {
     }
   };
 
+  const loadOpenCashRegister = async () => {
+    try {
+      const data = await getOpenCashRegister();
+
+      if (!data.responseBoolean || !data.responseObject) {
+        setOpenRegister(null);
+        return null;
+      }
+
+      setOpenRegister(data.responseObject);
+      return data.responseObject;
+    } catch (error) {
+      console.error("Error al validar caja abierta:", error);
+      setOpenRegister(null);
+      return null;
+    }
+  };
+
   useEffect(() => {
     loadSales();
     loadProducts();
+    loadOpenCashRegister();
   }, []);
 
   const getStatusBadge = (status) => {
@@ -117,11 +137,19 @@ function Sales() {
     setSelectedQuantity("");
   };
 
-  const handleNewSale = () => {
-    resetForm();
-    setShowForm(true);
+  const handleNewSale = async () => {
     setError("");
     setSuccess("");
+
+    const cashRegister = await loadOpenCashRegister();
+
+    if (!cashRegister) {
+      setError("No hay caja abierta. Primero abre caja para poder registrar ventas.");
+      return;
+    }
+
+    resetForm();
+    setShowForm(true);
   };
 
   const handleCancel = () => {
@@ -535,6 +563,12 @@ function Sales() {
         {success && <div className="alert alert-success">{success}</div>}
 
         {error && <div className="alert alert-danger">{error}</div>}
+
+        {!openRegister && !loading && (
+          <div className="alert alert-warning">
+            No hay caja abierta. Abre una caja desde el módulo Caja para registrar ventas.
+          </div>
+        )}
 
         {showForm && (
           <div className="sale-form-modal-container">

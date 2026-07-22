@@ -1,0 +1,155 @@
+/* Contenedor general */
+selector {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Título del plugin centrado */
+selector .widget-title,
+selector .widgettitle,
+selector h2:first-child,
+selector h3:first-child {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 0 30px 0 !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+}
+selector h2:first-child,
+selector h3:first-child {
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Lista de productos */
+selector ul.product_list_widget,
+selector ul {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 28px !important;
+    width: 100% !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+/* Cada tarjeta */
+selector ul.product_list_widget > li,
+selector ul > li {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    float: none !important;
+    clear: none !important;
+    text-align: center !important;
+}
+
+/* Enlace que contiene imagen y nombre */
+selector ul.product_list_widget > li > a,
+selector ul > li > a {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    color: #111111 !important;
+    text-decoration: none !important;
+}
+
+/* Imagen primero */
+selector ul.product_list_widget > li img,
+selector ul > li img {
+    order: -1 !important;
+    display: block !important;
+    width: 100% !important;
+    height: 430px !important;
+    max-width: none !important;
+    object-fit: cover !important;
+    float: none !important;
+    clear: both !important;
+    margin: 0 0 16px 0 !important;
+    padding: 0 !important;
+}
+
+/* Nombre del producto */
+selector .product-title,
+selector ul.product_list_widget > li > a,
+selector ul > li > a {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+}
+
+selector .product-title {
+    display: block !important;
+    width: 100% !important;
+    min-height: 38px !important;
+    margin: 0 0 10px 0 !important;
+}
+
+/* Precio */
+selector ul.product_list_widget > li > span,
+selector ul > li > span {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-top: 4px !important;
+}
+
+selector .woocommerce-Price-amount,
+selector .amount {
+    display: inline !important;
+    width: auto !important;
+    color: #111111 !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+}
+
+/* Símbolo de moneda */
+selector .woocommerce-Price-currencySymbol {
+    display: inline !important;
+    width: auto !important;
+    margin: 0 !important;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+    selector ul.product_list_widget,
+    selector ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 24px !important;
+    }
+
+    selector ul.product_list_widget > li img,
+    selector ul > li img {
+        height: 380px !important;
+    }
+}
+
+/* Móvil */
+@media (max-width: 767px) {
+    selector ul.product_list_widget,
+    selector ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 15px !important;
+    }
+
+    selector ul.product_list_widget > li img,
+    selector ul > li img {
+        height: 280px !important;
+    }
+
+    selector .product-title,
+    selector ul.product_list_widget > li > a,
+    selector ul > li > a,
+    selector .woocommerce-Price-amount,
+    selector .amount {
+        font-size: 12px !important;
+    }
+}

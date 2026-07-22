@@ -15,7 +15,14 @@ import "../styles/MainLayout.css";
 
 function MainLayout({ children }) {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+
+  const authData = JSON.parse(localStorage.getItem("authData"));
+  const user = authData || JSON.parse(localStorage.getItem("user")) || {};
+  const userRole = user?.role;
+
+  const canSee = (roles) => {
+    return roles.includes(userRole);
+  };
 
   const handleLogout = () => {
     localStorage.clear();
@@ -31,46 +38,63 @@ function MainLayout({ children }) {
           <div>
             <h3>Tienda</h3>
             <span>Sistema POS</span>
-
           </div>
         </div>
 
         <nav className="sidebar-menu">
-          <NavLink to="/dashboard">
-            <FaHome /> Dashboard
-          </NavLink>
+          {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+            <NavLink to="/dashboard">
+              <FaHome /> Dashboard
+            </NavLink>
+          )}
 
-          <NavLink to="/categories">
-            <FaTags /> Categorías
-          </NavLink>
+          {canSee(["OWNER", "ADMIN"]) && (
+            <NavLink to="/categories">
+              <FaTags /> Categorías
+            </NavLink>
+          )}
 
-          <NavLink to="/products">
-            <FaBoxOpen /> Productos
-          </NavLink>
+          {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+            <NavLink to="/products">
+              <FaBoxOpen /> Productos
+            </NavLink>
+          )}
 
-          <NavLink to="/sales">
-            <FaCashRegister /> Ventas
-          </NavLink>
+          {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+            <NavLink to="/sales">
+              <FaCashRegister /> Ventas
+            </NavLink>
+          )}
 
-          <NavLink to="/inventory">
-            <FaWarehouse /> Inventario
-          </NavLink>
+          {canSee(["OWNER", "ADMIN"]) && (
+            <NavLink to="/inventory">
+              <FaWarehouse /> Inventario
+            </NavLink>
+          )}
 
-          <NavLink to="/cash-register">
-            <FaList /> Caja
-          </NavLink>
+          {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+            <NavLink to="/cash-register">
+              <FaList /> Caja
+            </NavLink>
+          )}
 
-          <NavLink to="/cash-movements">
-            <FaMoneyBillWave /> Movimientos caja
-          </NavLink>
+          {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
+            <NavLink to="/cash-movements">
+              <FaMoneyBillWave /> Movimientos caja
+            </NavLink>
+          )}
 
-          <NavLink to="/reports">
-            <FaChartBar /> Reportes
-          </NavLink>
+          {canSee(["OWNER", "ADMIN"]) && (
+            <NavLink to="/reports">
+              <FaChartBar /> Reportes
+            </NavLink>
+          )}
 
-          <NavLink to="/users">
-            <FaUsers /> Usuarios
-          </NavLink>
+          {canSee(["OWNER", "ADMIN"]) && (
+            <NavLink to="/users">
+              <FaUsers /> Usuarios
+            </NavLink>
+          )}
         </nav>
 
         <div className="sidebar-user-card">

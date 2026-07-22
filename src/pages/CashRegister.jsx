@@ -34,27 +34,41 @@ function CashRegister() {
   const [success, setSuccess] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const authData = JSON.parse(localStorage.getItem("authData")) || {};
+  const user = authData || JSON.parse(localStorage.getItem("user")) || {};
+  const userRole = user?.role;
+
+  const isCashier = userRole === "CASHIER";
 
   const loadCashRegisters = async () => {
     try {
+      if (isCashier) {
+        setCashRegisters([]);
+        return;
+      }
+
       const data = await getAllCashRegisters();
       setCashRegisters(data.responseObject || data);
     } catch (error) {
       console.error("Error al cargar cajas:", error);
-      setError("No se pudieron cargar las cajas.");
+
+      if (!isCashier) {
+        setError("No se pudieron cargar las cajas.");
+      }
+
+      setCashRegisters([]);
     }
   };
 
   const loadOpenCashRegister = async () => {
     try {
       const data = await getOpenCashRegister();
-  
+
       if (!data.responseBoolean || !data.responseObject) {
         setOpenRegister(null);
         return;
       }
-  
+
       setOpenRegister(data.responseObject);
     } catch (error) {
       console.error("Error al cargar caja abierta:", error);
@@ -67,8 +81,8 @@ function CashRegister() {
       setLoading(true);
       setError("");
 
-      await loadCashRegisters();
       await loadOpenCashRegister();
+      await loadCashRegisters();
     } finally {
       setLoading(false);
     }
@@ -103,7 +117,11 @@ function CashRegister() {
       return <span className="cash-status-badge closed">Cerrada</span>;
     }
 
-    return <span className="cash-status-badge default">{status || "Sin estado"}</span>;
+    return (
+      <span className="cash-status-badge default">
+        {status || "Sin estado"}
+      </span>
+    );
   };
 
   const handleShowOpenForm = () => {
@@ -160,7 +178,9 @@ function CashRegister() {
   };
 
   const handleShowCloseForm = () => {
-    setClosingAmount("");
+    const expectedAmount = Number(openRegister?.expectedAmount || 0).toFixed(2);
+
+    setClosingAmount(expectedAmount);
     setShowCloseForm(true);
     setShowOpenForm(false);
     setError("");
@@ -220,10 +240,6 @@ function CashRegister() {
 
   const totalRegisters = cashRegisters.length;
 
-  const closedRegisters = cashRegisters.filter(
-    (cashRegister) => cashRegister.status === "CLOSED"
-  ).length;
-
   const totalExpected = cashRegisters.reduce(
     (sum, cashRegister) => sum + Number(cashRegister.expectedAmount || 0),
     0
@@ -248,19 +264,29 @@ function CashRegister() {
         <div className="cash-header">
           <div className="cash-title">
             <h1>Caja</h1>
-            <p>Control de apertura, cierre e historial de caja.</p>
+            <p>
+              {isCashier
+                ? "Control de apertura y cierre de la caja actual."
+                : "Control de apertura, cierre e historial de caja."}
+            </p>
           </div>
 
           <div className="cash-header-actions">
             {!openRegister && (
-              <button className="btn btn-primary cash-action-btn" onClick={handleShowOpenForm}>
+              <button
+                className="btn btn-primary cash-action-btn"
+                onClick={handleShowOpenForm}
+              >
                 <FaPlus className="me-2" />
                 Abrir caja
               </button>
             )}
 
             {openRegister && (
-              <button className="btn btn-danger cash-action-btn" onClick={handleShowCloseForm}>
+              <button
+                className="btn btn-danger cash-action-btn"
+                onClick={handleShowCloseForm}
+              >
                 <FaLock className="me-2" />
                 Cerrar caja
               </button>
@@ -269,22 +295,30 @@ function CashRegister() {
         </div>
 
         <div className="row g-4 mb-4">
-          <div className="col-12 col-sm-6 col-lg-3">
-            <div className="cash-summary-card">
-              <div className="cash-summary-body">
-                <div className="cash-summary-icon blue">
-                  <FaCashRegister />
+          {!isCashier && (
+            <div className="col-12 col-sm-6 col-lg-3">
+              <div className="cash-summary-card">
+                <div className="cash-summary-body">
+                  <div className="cash-summary-icon blue">
+                    <FaCashRegister />
+                  </div>
+                  <p className="cash-summary-label">Total cajas</p>
+                  <h3 className="cash-summary-value">{totalRegisters}</h3>
                 </div>
-                <p className="cash-summary-label">Total cajas</p>
-                <h3 className="cash-summary-value">{totalRegisters}</h3>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="col-12 col-sm-6 col-lg-3">
             <div className="cash-summary-card">
               <div className="cash-summary-body">
-                <div className={openRegister ? "cash-summary-icon green" : "cash-summary-icon red"}>
+                <div
+                  className={
+                    openRegister
+                      ? "cash-summary-icon green"
+                      : "cash-summary-icon red"
+                  }
+                >
                   {openRegister ? <FaCheckCircle /> : <FaTimesCircle />}
                 </div>
                 <p className="cash-summary-label">Estado actual</p>
@@ -295,29 +329,69 @@ function CashRegister() {
             </div>
           </div>
 
-          <div className="col-12 col-sm-6 col-lg-3">
-            <div className="cash-summary-card">
-              <div className="cash-summary-body">
-                <div className="cash-summary-icon yellow">
-                  <FaMoneyBillWave />
+          {openRegister && isCashier && (
+            <>
+              <div className="col-12 col-sm-6 col-lg-3">
+                <div className="cash-summary-card">
+                  <div className="cash-summary-body">
+                    <div className="cash-summary-icon yellow">
+                      <FaMoneyBillWave />
+                    </div>
+                    <p className="cash-summary-label">Monto inicial</p>
+                    <h3 className="cash-summary-value">
+                      {formatCurrency(openRegister.openingAmount)}
+                    </h3>
+                  </div>
                 </div>
-                <p className="cash-summary-label">Esperado histórico</p>
-                <h3 className="cash-summary-value">{formatCurrency(totalExpected)}</h3>
               </div>
-            </div>
-          </div>
 
-          <div className="col-12 col-sm-6 col-lg-3">
-            <div className="cash-summary-card">
-              <div className="cash-summary-body">
-                <div className="cash-summary-icon red">
-                  <FaMoneyBillWave />
+              <div className="col-12 col-sm-6 col-lg-3">
+                <div className="cash-summary-card">
+                  <div className="cash-summary-body">
+                    <div className="cash-summary-icon blue">
+                      <FaMoneyBillWave />
+                    </div>
+                    <p className="cash-summary-label">Monto esperado</p>
+                    <h3 className="cash-summary-value">
+                      {formatCurrency(openRegister.expectedAmount)}
+                    </h3>
+                  </div>
                 </div>
-                <p className="cash-summary-label">Diferencia total</p>
-                <h3 className="cash-summary-value">{formatCurrency(totalDifferences)}</h3>
               </div>
-            </div>
-          </div>
+            </>
+          )}
+
+          {!isCashier && (
+            <>
+              <div className="col-12 col-sm-6 col-lg-3">
+                <div className="cash-summary-card">
+                  <div className="cash-summary-body">
+                    <div className="cash-summary-icon yellow">
+                      <FaMoneyBillWave />
+                    </div>
+                    <p className="cash-summary-label">Esperado histórico</p>
+                    <h3 className="cash-summary-value">
+                      {formatCurrency(totalExpected)}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-12 col-sm-6 col-lg-3">
+                <div className="cash-summary-card">
+                  <div className="cash-summary-body">
+                    <div className="cash-summary-icon red">
+                      <FaMoneyBillWave />
+                    </div>
+                    <p className="cash-summary-label">Diferencia total</p>
+                    <h3 className="cash-summary-value">
+                      {formatCurrency(totalDifferences)}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {success && <div className="alert alert-success">{success}</div>}
@@ -347,7 +421,8 @@ function CashRegister() {
                       <div>
                         <h5>Caja abierta</h5>
                         <p>
-                          Abierta por {openRegister.openedByName || "Sin usuario"} el{" "}
+                          Abierta por{" "}
+                          {openRegister.openedByName || "Sin usuario"} el{" "}
                           {formatDate(openRegister.openedAt)}.
                         </p>
                       </div>
@@ -364,21 +439,27 @@ function CashRegister() {
                       <div className="col-12 col-md-3">
                         <div className="cash-info-box">
                           <span>Monto inicial</span>
-                          <strong>{formatCurrency(openRegister.openingAmount)}</strong>
+                          <strong>
+                            {formatCurrency(openRegister.openingAmount)}
+                          </strong>
                         </div>
                       </div>
 
                       <div className="col-12 col-md-3">
                         <div className="cash-info-box">
                           <span>Monto esperado</span>
-                          <strong>{formatCurrency(openRegister.expectedAmount)}</strong>
+                          <strong>
+                            {formatCurrency(openRegister.expectedAmount)}
+                          </strong>
                         </div>
                       </div>
 
                       <div className="col-12 col-md-3">
                         <div className="cash-info-box">
                           <span>Abierta por</span>
-                          <strong>{openRegister.openedByName || "Sin usuario"}</strong>
+                          <strong>
+                            {openRegister.openedByName || "Sin usuario"}
+                          </strong>
                         </div>
                       </div>
                     </div>
@@ -389,8 +470,13 @@ function CashRegister() {
                       <FaLock />
                     </div>
                     <h5>No hay una caja abierta</h5>
-                    <p>Para registrar operaciones de caja, primero abre una caja.</p>
-                    <button className="btn btn-primary cash-action-btn" onClick={handleShowOpenForm}>
+                    <p>
+                      Para registrar operaciones de caja, primero abre una caja.
+                    </p>
+                    <button
+                      className="btn btn-primary cash-action-btn"
+                      onClick={handleShowOpenForm}
+                    >
                       Abrir caja
                     </button>
                   </div>
@@ -422,11 +508,19 @@ function CashRegister() {
                     </div>
 
                     <div className="d-flex gap-2">
-                      <button type="submit" className="btn btn-success" disabled={saving}>
+                      <button
+                        type="submit"
+                        className="btn btn-success"
+                        disabled={saving}
+                      >
                         {saving ? "Abriendo..." : "Abrir caja"}
                       </button>
 
-                      <button type="button" className="btn btn-secondary" onClick={handleCancelOpen}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={handleCancelOpen}
+                      >
                         Cancelar
                       </button>
                     </div>
@@ -439,7 +533,9 @@ function CashRegister() {
               <div className="card cash-form-card mb-4">
                 <div className="card-body">
                   <h5>Cerrar caja</h5>
-                  <p>Ingresa el monto real contado para calcular la diferencia.</p>
+                  <p>
+                    Ingresa el monto real contado para calcular la diferencia.
+                  </p>
 
                   <div className="cash-close-info">
                     <span>Monto esperado</span>
@@ -449,7 +545,9 @@ function CashRegister() {
                   <form onSubmit={handleCloseCashRegister}>
                     <div className="row">
                       <div className="col-md-4 mb-3">
-                        <label className="form-label">Monto final contado</label>
+                        <label className="form-label">
+                          Monto final contado
+                        </label>
                         <input
                           type="number"
                           className="form-control"
@@ -460,15 +558,37 @@ function CashRegister() {
                           placeholder="0.00"
                           required
                         />
+
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary mt-2"
+                          onClick={() =>
+                            setClosingAmount(
+                              Number(openRegister?.expectedAmount || 0).toFixed(
+                                2
+                              )
+                            )
+                          }
+                        >
+                          Usar monto esperado
+                        </button>
                       </div>
                     </div>
 
                     <div className="d-flex gap-2">
-                      <button type="submit" className="btn btn-danger" disabled={saving}>
+                      <button
+                        type="submit"
+                        className="btn btn-danger"
+                        disabled={saving}
+                      >
                         {saving ? "Cerrando..." : "Cerrar caja"}
                       </button>
 
-                      <button type="button" className="btn btn-secondary" onClick={handleCancelClose}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={handleCancelClose}
+                      >
                         Cancelar
                       </button>
                     </div>
@@ -477,96 +597,113 @@ function CashRegister() {
               </div>
             )}
 
-            <div className="card cash-history-card">
-              <div className="card-body">
-                <div className="cash-toolbar">
-                  <div>
-                    <h5>Historial de cajas</h5>
-                    <p>{filteredCashRegisters.length} registro(s) encontrados.</p>
-                  </div>
+            {!isCashier && (
+              <div className="card cash-history-card">
+                <div className="card-body">
+                  <div className="cash-toolbar">
+                    <div>
+                      <h5>Historial de cajas</h5>
+                      <p>
+                        {filteredCashRegisters.length} registro(s) encontrados.
+                      </p>
+                    </div>
 
-                  <div className="cash-search">
-                    <div className="input-group">
-                      <span className="input-group-text">
-                        <FaSearch />
-                      </span>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Buscar por usuario, estado o ID..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
+                    <div className="cash-search">
+                      <div className="input-group">
+                        <span className="input-group-text">
+                          <FaSearch />
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Buscar por usuario, estado o ID..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="cash-table-wrapper">
-                  <table className="table table-hover align-middle cash-table">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Estado</th>
-                        <th>Monto inicial</th>
-                        <th>Monto esperado</th>
-                        <th>Monto cierre</th>
-                        <th>Diferencia</th>
-                        <th>Abrió</th>
-                        <th>Cerró</th>
-                        <th>Fecha apertura</th>
-                        <th>Fecha cierre</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {filteredCashRegisters.length === 0 ? (
+                  <div className="cash-table-wrapper">
+                    <table className="table table-hover align-middle cash-table">
+                      <thead>
                         <tr>
-                          <td colSpan="10" className="text-center text-muted py-4">
-                            No hay registros de caja.
-                          </td>
+                          <th>ID</th>
+                          <th>Estado</th>
+                          <th>Monto inicial</th>
+                          <th>Monto esperado</th>
+                          <th>Monto cierre</th>
+                          <th>Diferencia</th>
+                          <th>Abrió</th>
+                          <th>Cerró</th>
+                          <th>Fecha apertura</th>
+                          <th>Fecha cierre</th>
                         </tr>
-                      ) : (
-                        filteredCashRegisters.map((cashRegister) => (
-                          <tr key={cashRegister.id}>
-                            <td>
-                              <strong>#{cashRegister.id}</strong>
+                      </thead>
+
+                      <tbody>
+                        {filteredCashRegisters.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan="10"
+                              className="text-center text-muted py-4"
+                            >
+                              No hay registros de caja.
                             </td>
-
-                            <td>{getStatusBadge(cashRegister.status)}</td>
-
-                            <td>{formatCurrency(cashRegister.openingAmount)}</td>
-
-                            <td>{formatCurrency(cashRegister.expectedAmount)}</td>
-
-                            <td>{formatCurrency(cashRegister.closingAmount)}</td>
-
-                            <td>
-                              <span
-                                className={
-                                  Number(cashRegister.difference || 0) === 0
-                                    ? "cash-difference-ok"
-                                    : "cash-difference-bad"
-                                }
-                              >
-                                {formatCurrency(cashRegister.difference)}
-                              </span>
-                            </td>
-
-                            <td>{cashRegister.openedByName || "Sin usuario"}</td>
-
-                            <td>{cashRegister.closedByName || "Sin usuario"}</td>
-
-                            <td>{formatDate(cashRegister.openedAt)}</td>
-
-                            <td>{formatDate(cashRegister.closedAt)}</td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                        ) : (
+                          filteredCashRegisters.map((cashRegister) => (
+                            <tr key={cashRegister.id}>
+                              <td>
+                                <strong>#{cashRegister.id}</strong>
+                              </td>
+
+                              <td>{getStatusBadge(cashRegister.status)}</td>
+
+                              <td>
+                                {formatCurrency(cashRegister.openingAmount)}
+                              </td>
+
+                              <td>
+                                {formatCurrency(cashRegister.expectedAmount)}
+                              </td>
+
+                              <td>
+                                {formatCurrency(cashRegister.closingAmount)}
+                              </td>
+
+                              <td>
+                                <span
+                                  className={
+                                    Number(cashRegister.difference || 0) === 0
+                                      ? "cash-difference-ok"
+                                      : "cash-difference-bad"
+                                  }
+                                >
+                                  {formatCurrency(cashRegister.difference)}
+                                </span>
+                              </td>
+
+                              <td>
+                                {cashRegister.openedByName || "Sin usuario"}
+                              </td>
+
+                              <td>
+                                {cashRegister.closedByName || "Sin usuario"}
+                              </td>
+
+                              <td>{formatDate(cashRegister.openedAt)}</td>
+
+                              <td>{formatDate(cashRegister.closedAt)}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>

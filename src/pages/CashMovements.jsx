@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import {
   createCashMovement,
   getAllCashMovements,
+  getCashMovementsByCashRegister,
 } from "../services/cashMovementService";
 import { getOpenCashRegister } from "../services/cashRegisterService";
 import {
@@ -36,25 +37,55 @@ function CashMovements() {
   const [success, setSuccess] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  const loadMovements = async () => {
-    try {
-      const data = await getAllCashMovements();
-      setMovements(data.responseObject || data);
-    } catch (error) {
-      console.error("Error al cargar movimientos de caja:", error);
-      setError("No se pudieron cargar los movimientos de caja.");
-    }
-  };
+  const authData = JSON.parse(localStorage.getItem("authData")) || {};
+  const user = authData || JSON.parse(localStorage.getItem("user")) || {};
+  const userRole = user?.role;
 
   const loadOpenRegister = async () => {
     try {
       const data = await getOpenCashRegister();
-      setOpenRegister(data.responseObject || data);
+
+      if (!data.responseBoolean || !data.responseObject) {
+        setOpenRegister(null);
+        return null;
+      }
+
+      setOpenRegister(data.responseObject);
+      return data.responseObject;
     } catch (error) {
       console.warn("No hay caja abierta:", error);
       setOpenRegister(null);
+      return null;
+    }
+  };
+
+  const loadMovements = async (cashRegister) => {
+    try {
+      setError("");
+
+      if (userRole === "CASHIER") {
+        if (!cashRegister?.id) {
+          setMovements([]);
+          return;
+        }
+
+        const data = await getCashMovementsByCashRegister(cashRegister.id);
+        setMovements(data.responseObject || data);
+        return;
+      }
+
+      const data = await getAllCashMovements();
+      setMovements(data.responseObject || data);
+    } catch (error) {
+      console.error("Error al cargar movimientos de caja:", error);
+      setMovements([]);
+
+      const message =
+        error.response?.data?.responseString ||
+        error.response?.data?.message ||
+        "No se pudieron cargar los movimientos de caja.";
+
+      setError(message);
     }
   };
 
@@ -63,8 +94,8 @@ function CashMovements() {
       setLoading(true);
       setError("");
 
-      await loadOpenRegister();
-      await loadMovements();
+      const cashRegister = await loadOpenRegister();
+      await loadMovements(cashRegister);
     } finally {
       setLoading(false);
     }
@@ -208,16 +239,11 @@ function CashMovements() {
     .filter((movement) => movement.type === "EXPENSE")
     .reduce((sum, movement) => sum + Number(movement.amount || 0), 0);
 
-  const manualMovements = movements.filter(
-    (movement) => movement.type === "INCOME" || movement.type === "EXPENSE"
-  ).length;
-
   const balance = totalIncome - totalExpense;
 
   const filteredMovements = movements.filter((movement) => {
-    const text = `${movement.id} ${movement.type || ""} ${
-      movement.description || ""
-    } ${movement.userName || ""} ${movement.saleFolio || ""}`.toLowerCase();
+    const text = `${movement.id} ${movement.type || ""} ${movement.description || ""
+      } ${movement.userName || ""} ${movement.saleFolio || ""}`.toLowerCase();
 
     return text.includes(searchTerm.toLowerCase());
   });
@@ -228,7 +254,11 @@ function CashMovements() {
         <div className="movements-header">
           <div className="movements-title">
             <h1>Movimientos de caja</h1>
-            <p>Registro de entradas y salidas manuales de efectivo.</p>
+            <p>
+              {userRole === "CASHIER"
+                ? "Registro de entradas y salidas de la caja actual."
+                : "Registro de entradas y salidas manuales de efectivo."}
+            </p>
           </div>
 
           <button
@@ -452,7 +482,11 @@ function CashMovements() {
             <div className="card-body">
               <div className="movements-toolbar">
                 <div>
-                  <h5>Historial de movimientos</h5>
+                  <h5>
+                    {userRole === "CASHIER"
+                      ? "Movimientos de la caja actual"
+                      : "Historial de movimientos"}
+                  </h5>
                   <p>{filteredMovements.length} movimiento(s) encontrados.</p>
                 </div>
 
@@ -534,8 +568,8 @@ function CashMovements() {
                             {movement.saleFolio
                               ? movement.saleFolio
                               : movement.saleId
-                              ? `Venta #${movement.saleId}`
-                              : "No aplica"}
+                                ? `Venta #${movement.saleId}`
+                                : "No aplica"}
                           </td>
 
                           <td>{formatDate(movement.createdAt)}</td>

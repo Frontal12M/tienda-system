@@ -300,12 +300,28 @@ function Dashboard() {
                   )}
 
                   {canSee(["OWNER", "ADMIN", "CASHIER"]) && (
-                    <Link
-                      to={routes.movimientosCaja}
-                      className="quick-action-btn"
-                    >
-                      Movimientos de caja
-                    </Link>
+                    <>
+                      <Link
+                        to={routes.movimientosCaja}
+                        className="quick-action-btn"
+                      >
+                        Pago a proveedor
+                      </Link>
+
+                      <Link
+                        to={routes.movimientosCaja}
+                        className="quick-action-btn"
+                      >
+                        Entrada de efectivo
+                      </Link>
+
+                      <Link
+                        to={routes.movimientosCaja}
+                        className="quick-action-btn"
+                      >
+                        Movimientos de caja
+                      </Link>
+                    </>
                   )}
 
                   {canSee(["OWNER", "ADMIN", "CASHIER"]) && (

@@ -334,3 +334,8 @@
       justify-content: flex-start;
     }
   }
+
+  .user-role-badge.owner {
+    background: #111827;
+    color: #ffffff;
+  }

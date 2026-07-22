@@ -21,12 +21,19 @@ import "../styles/Users.css";
 function Users() {
   const [users, setUsers] = useState([]);
 
+  const authData = JSON.parse(localStorage.getItem("authData")) || {};
+  const currentUser = authData || JSON.parse(localStorage.getItem("user")) || {};
+  const currentUserRole = currentUser?.role;
+  const currentUserId = currentUser?.id;
+
+  const isOwner = currentUserRole === "OWNER";
+
   const initialFormData = {
     name: "",
     username: "",
     email: "",
     password: "",
-    role: "ADMIN",
+    role: "CASHIER",
     active: true,
   };
 
@@ -101,7 +108,7 @@ function Users() {
       username: user.username || "",
       email: user.email || "",
       password: "",
-      role: user.role || "ADMIN",
+      role: user.role || "CASHIER",
       active: user.active ?? true,
     });
 
@@ -147,16 +154,22 @@ function Users() {
         return;
       }
 
+      if (!isOwner && formData.role === "OWNER") {
+        setError("Solo el dueño puede asignar el rol OWNER.");
+        setSaving(false);
+        return;
+      }
+
       const userToSave = {
-        name: formData.name,
-        username: formData.username,
-        email: formData.email,
+        name: formData.name.trim(),
+        username: formData.username.trim(),
+        email: formData.email.trim(),
         role: formData.role,
         active: formData.active,
       };
 
       if (formData.password.trim()) {
-        userToSave.password = formData.password;
+        userToSave.password = formData.password.trim();
       }
 
       let data;
@@ -207,9 +220,14 @@ function Users() {
     }
   };
 
-  const handleDeactivate = async (id) => {
+  const handleDeactivate = async (userToDeactivate) => {
+    if (userToDeactivate.id === currentUserId) {
+      setError("No puedes desactivar tu propio usuario mientras estás en sesión.");
+      return;
+    }
+
     const confirmDeactivate = window.confirm(
-      "¿Seguro que deseas desactivar este usuario?"
+      `¿Seguro que deseas desactivar al usuario "${userToDeactivate.name}"?`
     );
 
     if (!confirmDeactivate) return;
@@ -218,7 +236,7 @@ function Users() {
       setError("");
       setSuccess("");
 
-      const data = await deactivateUser(id);
+      const data = await deactivateUser(userToDeactivate.id);
 
       setSuccess(data.responseString || "Usuario desactivado correctamente.");
       await loadUsers();
@@ -234,9 +252,19 @@ function Users() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (userToDelete) => {
+    if (userToDelete.id === currentUserId) {
+      setError("No puedes eliminar tu propio usuario mientras estás en sesión.");
+      return;
+    }
+
+    if (userToDelete.role === "OWNER" && !isOwner) {
+      setError("Solo el dueño puede eliminar usuarios OWNER.");
+      return;
+    }
+
     const confirmDelete = window.confirm(
-      "¿Seguro que deseas eliminar este usuario? Esta acción no se puede deshacer."
+      `¿Seguro que deseas eliminar al usuario "${userToDelete.name}"? Esta acción no se puede deshacer.`
     );
 
     if (!confirmDelete) return;
@@ -245,7 +273,7 @@ function Users() {
       setError("");
       setSuccess("");
 
-      const data = await deleteUser(id);
+      const data = await deleteUser(userToDelete.id);
 
       setSuccess(data.responseString || "Usuario eliminado correctamente.");
       await loadUsers();
@@ -270,16 +298,16 @@ function Users() {
   };
 
   const getRoleBadge = (role) => {
+    if (role === "OWNER") {
+      return <span className="user-role-badge owner">OWNER</span>;
+    }
+
     if (role === "ADMIN") {
       return <span className="user-role-badge admin">ADMIN</span>;
     }
 
     if (role === "CASHIER") {
       return <span className="user-role-badge cashier">CAJERO</span>;
-    }
-
-    if (role === "EMPLOYEE") {
-      return <span className="user-role-badge employee">EMPLEADO</span>;
     }
 
     return <span className="user-role-badge default">{role || "Sin rol"}</span>;
@@ -298,12 +326,11 @@ function Users() {
   };
 
   const totalUsers = users.length;
-
   const activeUsers = users.filter((user) => user.active).length;
-
   const inactiveUsers = users.filter((user) => !user.active).length;
-
-  const adminUsers = users.filter((user) => user.role === "ADMIN").length;
+  const adminUsers = users.filter(
+    (user) => user.role === "ADMIN" || user.role === "OWNER"
+  ).length;
 
   const filteredUsers = users.filter((user) => {
     const text = `${user.id} ${user.name || ""} ${user.username || ""} ${
@@ -311,7 +338,6 @@ function Users() {
     } ${user.role || ""} ${user.active ? "activo" : "inactivo"}`.toLowerCase();
 
     const matchesSearch = text.includes(searchTerm.toLowerCase());
-
     const matchesRole = roleFilter === "ALL" || user.role === roleFilter;
 
     const matchesStatus =
@@ -482,9 +508,9 @@ function Users() {
                       onChange={handleChange}
                       required
                     >
+                      {isOwner && <option value="OWNER">Dueño</option>}
                       <option value="ADMIN">Administrador</option>
                       <option value="CASHIER">Cajero</option>
-                      <option value="EMPLOYEE">Empleado</option>
                     </select>
                   </div>
 
@@ -565,9 +591,9 @@ function Users() {
                   onChange={(e) => setRoleFilter(e.target.value)}
                 >
                   <option value="ALL">Todos los roles</option>
+                  <option value="OWNER">Dueños</option>
                   <option value="ADMIN">Administradores</option>
                   <option value="CASHIER">Cajeros</option>
-                  <option value="EMPLOYEE">Empleados</option>
                 </select>
 
                 <select
@@ -612,65 +638,78 @@ function Users() {
                         </td>
                       </tr>
                     ) : (
-                      filteredUsers.map((user) => (
-                        <tr key={user.id}>
-                          <td>
-                            <strong>#{user.id}</strong>
-                          </td>
+                      filteredUsers.map((user) => {
+                        const isCurrentUser = user.id === currentUserId;
 
-                          <td>
-                            <div className="user-name">{user.name}</div>
-                          </td>
+                        return (
+                          <tr key={user.id}>
+                            <td>
+                              <strong>#{user.id}</strong>
+                            </td>
 
-                          <td>{user.username}</td>
+                            <td>
+                              <div className="user-name">
+                                {user.name}
+                                {isCurrentUser && (
+                                  <small className="text-muted ms-2">
+                                    (Tú)
+                                  </small>
+                                )}
+                              </div>
+                            </td>
 
-                          <td>{user.email}</td>
+                            <td>{user.username}</td>
 
-                          <td>{getRoleBadge(user.role)}</td>
+                            <td>{user.email}</td>
 
-                          <td>{getStatusBadge(user.active)}</td>
+                            <td>{getRoleBadge(user.role)}</td>
 
-                          <td>{formatDate(user.createdAt)}</td>
+                            <td>{getStatusBadge(user.active)}</td>
 
-                          <td>
-                            <div className="users-action-buttons">
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-outline-primary"
-                                onClick={() => handleEdit(user)}
-                              >
-                                Editar
-                              </button>
+                            <td>{formatDate(user.createdAt)}</td>
 
-                              {user.active ? (
+                            <td>
+                              <div className="users-action-buttons">
                                 <button
                                   type="button"
-                                  className="btn btn-sm btn-outline-warning"
-                                  onClick={() => handleDeactivate(user.id)}
+                                  className="btn btn-sm btn-outline-primary"
+                                  onClick={() => handleEdit(user)}
                                 >
-                                  Desactivar
+                                  Editar
                                 </button>
-                              ) : (
+
+                                {user.active ? (
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-warning"
+                                    onClick={() => handleDeactivate(user)}
+                                    disabled={isCurrentUser}
+                                  >
+                                    Desactivar
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-success"
+                                    onClick={() => handleActivate(user.id)}
+                                  >
+                                    Activar
+                                  </button>
+                                )}
+
                                 <button
                                   type="button"
-                                  className="btn btn-sm btn-outline-success"
-                                  onClick={() => handleActivate(user.id)}
+                                  className="btn btn-sm btn-outline-danger"
+                                  onClick={() => handleDelete(user)}
+                                  disabled={isCurrentUser}
                                 >
-                                  Activar
+                                  Eliminar
                                 </button>
-                              )}
-
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-outline-danger"
-                                onClick={() => handleDelete(user.id)}
-                              >
-                                Eliminar
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>

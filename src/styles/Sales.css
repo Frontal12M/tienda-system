@@ -1261,3 +1261,87 @@
     margin: 0;
   }
 }
+
+/* =========================
+   PAGINACIÓN HISTORIAL VENTAS
+========================= */
+
+.sales-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 620px;
+  width: 100%;
+}
+
+.sales-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.sales-per-page span {
+  color: #64748b;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.sales-per-page .form-select {
+  width: 88px;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.sales-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.sales-pagination-info {
+  color: #64748b;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.sales-pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sales-pagination-buttons .btn {
+  border-radius: 12px;
+  font-weight: 800;
+  padding: 8px 13px;
+}
+
+@media (max-width: 768px) {
+  .sales-toolbar-actions {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 100%;
+  }
+
+  .sales-per-page {
+    justify-content: space-between;
+  }
+
+  .sales-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sales-pagination-buttons {
+    width: 100%;
+  }
+}

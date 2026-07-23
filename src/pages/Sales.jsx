@@ -54,6 +54,9 @@ function Sales() {
   const [productSearchTerm, setProductSearchTerm] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [salesPerPage, setSalesPerPage] = useState(10);
+
   const [barcodeInput, setBarcodeInput] = useState("");
   const barcodeInputRef = useRef(null);
 
@@ -118,6 +121,10 @@ function Sales() {
       }, 200);
     }
   }, [showForm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, salesPerPage]);
 
   const resetForm = () => {
     setFormData({
@@ -461,6 +468,28 @@ function Sales() {
     }
   };
 
+  const handleReprintTicket = async (saleId) => {
+    try {
+      setError("");
+      setSuccess("");
+
+      const data = await getSaleById(saleId);
+      const sale = data.responseObject || data;
+
+      setTicketSale(sale);
+      setShowTicketModal(true);
+    } catch (error) {
+      console.error("Error al cargar ticket:", error);
+
+      const message =
+        error.response?.data?.responseString ||
+        error.response?.data?.message ||
+        "No se pudo cargar el ticket de la venta.";
+
+      setError(message);
+    }
+  };
+
   const handleCloseDetailModal = () => {
     setSelectedSale(null);
     setShowDetailModal(false);
@@ -532,6 +561,23 @@ function Sales() {
 
     return text.includes(searchTerm.toLowerCase());
   });
+
+  const totalPages = Math.ceil(filteredSales.length / salesPerPage);
+const startIndex = (currentPage - 1) * salesPerPage;
+const endIndex = startIndex + salesPerPage;
+const paginatedSales = filteredSales.slice(startIndex, endIndex);
+
+const handlePreviousPage = () => {
+  if (currentPage > 1) {
+    setCurrentPage(currentPage - 1);
+  }
+};
+
+const handleNextPage = () => {
+  if (currentPage < totalPages) {
+    setCurrentPage(currentPage + 1);
+  }
+};
 
   return (
     <MainLayout>
@@ -936,23 +982,43 @@ function Sales() {
               <div className="sales-toolbar">
                 <div>
                   <h5>Historial de ventas</h5>
-                  <p>{filteredSales.length} venta(s) encontradas.</p>
+                  <p>
+  Mostrando {paginatedSales.length} de {filteredSales.length} venta(s)
+  encontradas.
+</p>
                 </div>
 
-                <div className="sales-search">
-                  <div className="input-group">
-                    <span className="input-group-text">
-                      <FaSearch />
-                    </span>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Buscar folio, usuario o estado..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                </div>
+                <div className="sales-toolbar-actions">
+  <div className="sales-per-page">
+    <span>Mostrar</span>
+
+    <select
+      className="form-select"
+      value={salesPerPage}
+      onChange={(e) => setSalesPerPage(Number(e.target.value))}
+    >
+      <option value={5}>5</option>
+      <option value={10}>10</option>
+      <option value={20}>20</option>
+      <option value={50}>50</option>
+    </select>
+  </div>
+
+  <div className="sales-search">
+    <div className="input-group">
+      <span className="input-group-text">
+        <FaSearch />
+      </span>
+      <input
+        type="text"
+        className="form-control"
+        placeholder="Buscar folio, usuario o estado..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+    </div>
+  </div>
+</div>
               </div>
 
               <div className="sales-table-wrapper">
@@ -970,14 +1036,14 @@ function Sales() {
                   </thead>
 
                   <tbody>
-                    {filteredSales.length === 0 ? (
+                  {filteredSales.length === 0 ? (
                       <tr>
                         <td colSpan="7" className="text-center text-muted py-4">
                           No hay ventas registradas.
                         </td>
                       </tr>
                     ) : (
-                      filteredSales.map((sale) => (
+                      paginatedSales.map((sale) => (
                         <tr key={sale.id}>
                           <td>
                             <div className="sale-folio">
@@ -1013,6 +1079,15 @@ function Sales() {
                                 Ver
                               </button>
 
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={() => handleReprintTicket(sale.id)}
+                              >
+                                <FaReceipt className="me-1" />
+                                Ticket
+                              </button>
+
                               {sale.status !== "CANCELLED" && (
                                 <button
                                   type="button"
@@ -1030,8 +1105,55 @@ function Sales() {
                   </tbody>
                 </table>
               </div>
+              {filteredSales.length > 0 && (
+  <div className="sales-pagination">
+    <div className="sales-pagination-info">
+      Página {currentPage} de {totalPages || 1}
+    </div>
+
+    <div className="sales-pagination-buttons">
+      <button
+        type="button"
+        className="btn btn-outline-secondary"
+        onClick={handlePreviousPage}
+        disabled={currentPage === 1}
+      >
+        Anterior
+      </button>
+
+      {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+        (page) => (
+          <button
+            type="button"
+            key={page}
+            className={
+              page === currentPage
+                ? "btn btn-primary"
+                : "btn btn-outline-primary"
+            }
+            onClick={() => setCurrentPage(page)}
+          >
+            {page}
+          </button>
+        )
+      )}
+
+      <button
+        type="button"
+        className="btn btn-outline-secondary"
+        onClick={handleNextPage}
+        disabled={currentPage === totalPages}
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
+)}
+
             </div>
           </div>
+
+
         )}
 
         {showDetailModal && selectedSale && (
@@ -1225,9 +1347,17 @@ function Sales() {
 
                           <div className="ticket-product-row">
                             <span>
-                              {detail.quantity} x {formatCurrency(detail.unitPrice)}
+                              {detail.quantity} x{" "}
+                              {formatCurrency(detail.unitPrice || detail.salePrice || detail.price)}
                             </span>
-                            <strong>{formatCurrency(detail.subtotal)}</strong>
+
+                            <strong>
+                              {formatCurrency(
+                                detail.subtotal ||
+                                Number(detail.quantity || 0) *
+                                Number(detail.unitPrice || detail.salePrice || detail.price || 0)
+                              )}
+                            </strong>
                           </div>
                         </div>
                       ))}

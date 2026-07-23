@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import { getAllProducts } from "../services/productsService";
 import {
@@ -21,23 +21,26 @@ import { getOpenCashRegister } from "../services/cashRegisterService";
 import "../styles/Sales.css";
 
 function Sales() {
+  const authData = JSON.parse(localStorage.getItem("authData")) || {};
+  const user = authData || JSON.parse(localStorage.getItem("user")) || {};
+
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [openRegister, setOpenRegister] = useState(null);
+
   const initialFormData = {
-    userId: "1",
+    userId: user?.id || "1",
     amountReceived: "",
     paymentMethod: "CASH",
   };
 
   const [formData, setFormData] = useState(initialFormData);
   const [saleItems, setSaleItems] = useState([]);
-  const [selectedProductId, setSelectedProductId] = useState("");
-  const [selectedQuantity, setSelectedQuantity] = useState("");
 
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -47,6 +50,9 @@ function Sales() {
   const [searchTerm, setSearchTerm] = useState("");
   const [productSearchTerm, setProductSearchTerm] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
+
+  const [barcodeInput, setBarcodeInput] = useState("");
+  const barcodeInputRef = useRef(null);
 
   const loadSales = async () => {
     try {
@@ -102,39 +108,24 @@ function Sales() {
     loadOpenCashRegister();
   }, []);
 
-  const getStatusBadge = (status) => {
-    if (status === "COMPLETED") {
-      return <span className="sale-status-badge completed">Completada</span>;
+  useEffect(() => {
+    if (showForm && barcodeInputRef.current) {
+      setTimeout(() => {
+        barcodeInputRef.current.focus();
+      }, 200);
     }
-
-    if (status === "CANCELLED") {
-      return <span className="sale-status-badge cancelled">Cancelada</span>;
-    }
-
-    if (status === "PENDING") {
-      return <span className="sale-status-badge pending">Pendiente</span>;
-    }
-
-    if (status === "ACTIVE") {
-      return <span className="sale-status-badge completed">Activa</span>;
-    }
-
-    return <span className="sale-status-badge default">{status || "Sin estado"}</span>;
-  };
-
-  const getPaymentMethodText = (paymentMethod) => {
-    if (paymentMethod === "CASH") return "Efectivo";
-    if (paymentMethod === "CARD") return "Tarjeta";
-    if (paymentMethod === "TRANSFER") return "Transferencia";
-
-    return paymentMethod || "Sin método";
-  };
+  }, [showForm]);
 
   const resetForm = () => {
-    setFormData(initialFormData);
+    setFormData({
+      ...initialFormData,
+      userId: user?.id || "1",
+    });
+
     setSaleItems([]);
-    setSelectedProductId("");
-    setSelectedQuantity("");
+    setSelectedQuantities({});
+    setProductSearchTerm("");
+    setBarcodeInput("");
   };
 
   const handleNewSale = async () => {
@@ -168,8 +159,52 @@ function Sales() {
     });
   };
 
-  const getSelectedProduct = () => {
-    return products.find((product) => product.id === Number(selectedProductId));
+  const formatCurrency = (value) => {
+    return `$${Number(value || 0).toFixed(2)}`;
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "Sin fecha";
+
+    return new Date(date).toLocaleString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getStatusBadge = (status) => {
+    if (status === "COMPLETED") {
+      return <span className="sale-status-badge completed">Completada</span>;
+    }
+
+    if (status === "CANCELLED") {
+      return <span className="sale-status-badge cancelled">Cancelada</span>;
+    }
+
+    if (status === "PENDING") {
+      return <span className="sale-status-badge pending">Pendiente</span>;
+    }
+
+    if (status === "ACTIVE") {
+      return <span className="sale-status-badge completed">Activa</span>;
+    }
+
+    return (
+      <span className="sale-status-badge default">
+        {status || "Sin estado"}
+      </span>
+    );
+  };
+
+  const getPaymentMethodText = (paymentMethod) => {
+    if (paymentMethod === "CASH") return "Efectivo";
+    if (paymentMethod === "CARD") return "Tarjeta";
+    if (paymentMethod === "TRANSFER") return "Transferencia";
+
+    return paymentMethod || "Sin método";
   };
 
   const calculateTotal = () => {
@@ -197,50 +232,60 @@ function Sales() {
     return stock - quantityInCart;
   };
 
-  const handleAddItem = () => {
+  const handleProductQuantityChange = (productId, quantity) => {
+    setSelectedQuantities({
+      ...selectedQuantities,
+      [productId]: quantity,
+    });
+  };
+
+  const addProductToCart = (product, quantityToAdd = 1) => {
     setError("");
     setSuccess("");
 
-    const product = getSelectedProduct();
-    const quantity = Number(selectedQuantity);
+    const quantity = Number(quantityToAdd || 1);
+    const stock = Number(product.stock || 0);
+    const quantityInCart = getProductQuantityInCart(product.id);
+    const availableStock = stock - quantityInCart;
 
-    if (!product) {
-      setError("Selecciona un producto.");
-      return;
+    if (stock <= 0) {
+      setError(`"${product.name}" no tiene stock disponible.`);
+      return false;
     }
 
     if (!quantity || quantity <= 0) {
       setError("La cantidad debe ser mayor a 0.");
-      return;
+      return false;
     }
 
-    if (quantity > Number(product.stock)) {
+    if (availableStock <= 0) {
       setError(
-        `Stock insuficiente. El producto solo tiene ${product.stock} unidades disponibles.`
+        `Ya agregaste todo el stock disponible de "${product.name}" al carrito.`
       );
-      return;
+      return false;
+    }
+
+    if (quantity > availableStock) {
+      setError(
+        `Stock insuficiente. Solo puedes agregar ${availableStock} ${
+          availableStock === 1 ? "pieza más" : "piezas más"
+        } de "${product.name}".`
+      );
+      return false;
     }
 
     const existingItem = saleItems.find((item) => item.productId === product.id);
+    const newQuantity = quantityInCart + quantity;
 
     if (existingItem) {
-      const newQuantity = existingItem.quantity + quantity;
-
-      if (newQuantity > Number(product.stock)) {
-        setError(
-          `Stock insuficiente. El producto solo tiene ${product.stock} unidades disponibles.`
-        );
-        return;
-      }
-
       setSaleItems(
         saleItems.map((item) =>
           item.productId === product.id
             ? {
-              ...item,
-              quantity: newQuantity,
-              subtotal: Number(product.salePrice) * newQuantity,
-            }
+                ...item,
+                quantity: newQuantity,
+                subtotal: Number(product.salePrice) * newQuantity,
+              }
             : item
         )
       );
@@ -251,15 +296,57 @@ function Sales() {
           productId: product.id,
           productName: product.name,
           salePrice: Number(product.salePrice),
-          stock: Number(product.stock),
+          stock: stock,
           quantity: quantity,
           subtotal: Number(product.salePrice) * quantity,
         },
       ]);
     }
 
-    setSelectedProductId("");
-    setSelectedQuantity("");
+    setSuccess(`Producto agregado: ${product.name}`);
+    return true;
+  };
+
+  const handleAddProductToSale = (product) => {
+    const quantity = Number(selectedQuantities[product.id] || 1);
+    const added = addProductToCart(product, quantity);
+
+    if (added) {
+      setSelectedQuantities({
+        ...selectedQuantities,
+        [product.id]: "",
+      });
+    }
+  };
+
+  const handleBarcodeKeyDown = (e) => {
+    if (e.key !== "Enter") return;
+
+    e.preventDefault();
+
+    const code = barcodeInput.trim();
+
+    if (!code) {
+      setError("Escanea o escribe un código de barras.");
+      return;
+    }
+
+    const product = products.find(
+      (item) => String(item.barcode || "").trim() === code
+    );
+
+    if (!product) {
+      setError(`No se encontró ningún producto con el código "${code}".`);
+      setBarcodeInput("");
+      return;
+    }
+
+    const added = addProductToCart(product, 1);
+
+    if (added) {
+      setBarcodeInput("");
+      setProductSearchTerm("");
+    }
   };
 
   const handleRemoveItem = (productId) => {
@@ -305,8 +392,9 @@ function Sales() {
       setSuccess("Venta registrada correctamente.");
       resetForm();
       setShowForm(false);
-      loadSales();
-      loadProducts();
+      await loadSales();
+      await loadProducts();
+      await loadOpenCashRegister();
     } catch (error) {
       console.error("Error al guardar venta:", error);
 
@@ -362,8 +450,9 @@ function Sales() {
 
       setSuccess(data.responseString || "Venta cancelada correctamente.");
 
-      loadSales();
-      loadProducts();
+      await loadSales();
+      await loadProducts();
+      await loadOpenCashRegister();
     } catch (error) {
       console.error("Error al cancelar venta:", error);
 
@@ -376,22 +465,6 @@ function Sales() {
     }
   };
 
-  const formatCurrency = (value) => {
-    return `$${Number(value || 0).toFixed(2)}`;
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "Sin fecha";
-
-    return new Date(date).toLocaleString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   const total = calculateTotal();
   const change = calculateChange();
 
@@ -399,8 +472,9 @@ function Sales() {
     (sale) => sale.status === "COMPLETED" || sale.status === "ACTIVE"
   ).length;
 
-  const cancelledSales = sales.filter((sale) => sale.status === "CANCELLED")
-    .length;
+  const cancelledSales = sales.filter(
+    (sale) => sale.status === "CANCELLED"
+  ).length;
 
   const totalSold = sales
     .filter((sale) => sale.status !== "CANCELLED")
@@ -411,85 +485,10 @@ function Sales() {
     return text.includes(productSearchTerm.toLowerCase());
   });
 
-  const handleProductQuantityChange = (productId, quantity) => {
-    setSelectedQuantities({
-      ...selectedQuantities,
-      [productId]: quantity,
-    });
-  };
-
-  const handleAddProductToSale = (product) => {
-    setError("");
-    setSuccess("");
-
-    const quantity = Number(selectedQuantities[product.id] || 1);
-    const stock = Number(product.stock || 0);
-    const quantityInCart = getProductQuantityInCart(product.id);
-    const availableStock = stock - quantityInCart;
-
-    if (stock <= 0) {
-      setError(`"${product.name}" no tiene stock disponible.`);
-      return;
-    }
-
-    if (!quantity || quantity <= 0) {
-      setError("La cantidad debe ser mayor a 0.");
-      return;
-    }
-
-    if (availableStock <= 0) {
-      setError(
-        `Ya agregaste todo el stock disponible de "${product.name}" al carrito.`
-      );
-      return;
-    }
-
-    if (quantity > availableStock) {
-      setError(
-        `Stock insuficiente. Solo puedes agregar ${availableStock} ${availableStock === 1 ? "pieza más" : "piezas más"
-        } de "${product.name}".`
-      );
-      return;
-    }
-
-    const existingItem = saleItems.find((item) => item.productId === product.id);
-    const newQuantity = quantityInCart + quantity;
-
-    if (existingItem) {
-      setSaleItems(
-        saleItems.map((item) =>
-          item.productId === product.id
-            ? {
-              ...item,
-              quantity: newQuantity,
-              subtotal: Number(product.salePrice) * newQuantity,
-            }
-            : item
-        )
-      );
-    } else {
-      setSaleItems([
-        ...saleItems,
-        {
-          productId: product.id,
-          productName: product.name,
-          salePrice: Number(product.salePrice),
-          stock: stock,
-          quantity: quantity,
-          subtotal: Number(product.salePrice) * quantity,
-        },
-      ]);
-    }
-
-    setSelectedQuantities({
-      ...selectedQuantities,
-      [product.id]: "",
-    });
-  };
-
   const filteredSales = sales.filter((sale) => {
-    const text = `${sale.folio || ""} ${sale.userName || ""} ${sale.user?.name || ""
-      } ${getPaymentMethodText(sale.paymentMethod)} ${sale.status || ""}`
+    const text = `${sale.folio || ""} ${sale.userName || ""} ${
+      sale.user?.name || ""
+    } ${getPaymentMethodText(sale.paymentMethod)} ${sale.status || ""}`
       .toLowerCase();
 
     return text.includes(searchTerm.toLowerCase());
@@ -504,7 +503,10 @@ function Sales() {
             <p>Registro e historial de ventas de la tienda.</p>
           </div>
 
-          <button className="btn btn-primary sales-new-btn" onClick={handleNewSale}>
+          <button
+            className="btn btn-primary sales-new-btn"
+            onClick={handleNewSale}
+          >
             <FaPlus className="me-2" />
             Nueva venta
           </button>
@@ -554,7 +556,9 @@ function Sales() {
                   <FaCashRegister />
                 </div>
                 <p className="sales-summary-label">Total vendido</p>
-                <h3 className="sales-summary-value">{formatCurrency(totalSold)}</h3>
+                <h3 className="sales-summary-value">
+                  {formatCurrency(totalSold)}
+                </h3>
               </div>
             </div>
           </div>
@@ -566,7 +570,8 @@ function Sales() {
 
         {!openRegister && !loading && (
           <div className="alert alert-warning">
-            No hay caja abierta. Abre una caja desde el módulo Caja para registrar ventas.
+            No hay caja abierta. Abre una caja desde el módulo Caja para
+            registrar ventas.
           </div>
         )}
 
@@ -578,11 +583,13 @@ function Sales() {
               <div className="sale-form-modal-content">
                 <div className="card sale-form-card sale-form-card-modal">
                   <div className="card-body">
-
                     <div className="sale-form-header">
                       <div>
                         <h5>Nueva venta</h5>
-                        <p>Agrega productos, calcula total, pago recibido y cambio.</p>
+                        <p>
+                          Escanea productos, calcula total, pago recibido y
+                          cambio.
+                        </p>
                       </div>
 
                       <button
@@ -594,9 +601,17 @@ function Sales() {
                       </button>
                     </div>
 
-                    {error && <div className="alert alert-danger sale-modal-alert">{error}</div>}
+                    {error && (
+                      <div className="alert alert-danger sale-modal-alert">
+                        {error}
+                      </div>
+                    )}
 
-                    {success && <div className="alert alert-success sale-modal-alert">{success}</div>}
+                    {success && (
+                      <div className="alert alert-success sale-modal-alert">
+                        {success}
+                      </div>
+                    )}
 
                     <form onSubmit={handleSubmit}>
                       <div className="row g-4">
@@ -606,20 +621,19 @@ function Sales() {
 
                             <div className="row">
                               <div className="col-md-4 mb-3">
-                                <label className="form-label">ID Usuario</label>
+                                <label className="form-label">Usuario</label>
                                 <input
-                                  type="number"
-                                  name="userId"
+                                  type="text"
                                   className="form-control"
-                                  value={formData.userId}
-                                  onChange={handleChange}
-                                  min="1"
-                                  required
+                                  value={user?.name || "Usuario actual"}
+                                  disabled
                                 />
                               </div>
 
                               <div className="col-md-4 mb-3">
-                                <label className="form-label">Método de pago</label>
+                                <label className="form-label">
+                                  Método de pago
+                                </label>
                                 <select
                                   name="paymentMethod"
                                   className="form-select"
@@ -629,12 +643,16 @@ function Sales() {
                                 >
                                   <option value="CASH">Efectivo</option>
                                   <option value="CARD">Tarjeta</option>
-                                  <option value="TRANSFER">Transferencia</option>
+                                  <option value="TRANSFER">
+                                    Transferencia
+                                  </option>
                                 </select>
                               </div>
 
                               <div className="col-md-4 mb-3">
-                                <label className="form-label">Monto recibido</label>
+                                <label className="form-label">
+                                  Monto recibido
+                                </label>
                                 <input
                                   type="number"
                                   name="amountReceived"
@@ -654,8 +672,39 @@ function Sales() {
                             <div className="sale-product-search-header">
                               <div>
                                 <h6>Agregar producto</h6>
-                                <p>Busca por nombre o código de barras y agrega al carrito.</p>
+                                <p>
+                                  Escanea el código de barras o busca por nombre.
+                                </p>
                               </div>
+                            </div>
+
+                            <div className="sale-barcode-box mb-3">
+                              <label className="form-label">
+                                Escanear código de barras
+                              </label>
+
+                              <div className="input-group sale-barcode-input-group">
+                                <span className="input-group-text">
+                                  <FaReceipt />
+                                </span>
+
+                                <input
+                                  ref={barcodeInputRef}
+                                  type="text"
+                                  className="form-control sale-barcode-input"
+                                  placeholder="Escanea el código y presiona Enter..."
+                                  value={barcodeInput}
+                                  onChange={(e) =>
+                                    setBarcodeInput(e.target.value)
+                                  }
+                                  onKeyDown={handleBarcodeKeyDown}
+                                />
+                              </div>
+
+                              <small className="sale-barcode-help">
+                                También puedes escribir el código manualmente y
+                                presionar Enter.
+                              </small>
                             </div>
 
                             <div className="sale-product-search">
@@ -669,7 +718,9 @@ function Sales() {
                                   className="form-control"
                                   placeholder="Buscar producto por nombre o código..."
                                   value={productSearchTerm}
-                                  onChange={(e) => setProductSearchTerm(e.target.value)}
+                                  onChange={(e) =>
+                                    setProductSearchTerm(e.target.value)
+                                  }
                                 />
                               </div>
                             </div>
@@ -683,15 +734,18 @@ function Sales() {
                                 filteredProductsForSale.map((product) => (
                                   <div
                                     className={
-                                      getAvailableStock(product) <= 0 ? "sale-product-item sale-product-item-no-stock"
+                                      getAvailableStock(product) <= 0
+                                        ? "sale-product-item sale-product-item-no-stock"
                                         : "sale-product-item"
                                     }
                                     key={product.id}
-                                  >                                    <div className="sale-product-info">
+                                  >
+                                    <div className="sale-product-info">
                                       <strong>{product.name}</strong>
                                       <span>
-                                        Código: {product.barcode || "Sin código"} | Stock:{" "}
-                                        {getAvailableStock(product)}
+                                        Código:{" "}
+                                        {product.barcode || "Sin código"} |
+                                        Stock: {getAvailableStock(product)}
                                       </span>
                                     </div>
 
@@ -703,9 +757,11 @@ function Sales() {
                                       type="number"
                                       className="form-control sale-product-qty"
                                       min="1"
-                                      max={product.stock}
+                                      max={getAvailableStock(product)}
                                       placeholder="1"
-                                      value={selectedQuantities[product.id] || ""}
+                                      value={
+                                        selectedQuantities[product.id] || ""
+                                      }
                                       onChange={(e) =>
                                         handleProductQuantityChange(
                                           product.id,
@@ -721,52 +777,20 @@ function Sales() {
                                           ? "btn sale-product-add-btn sale-product-no-stock-btn"
                                           : "btn btn-outline-primary sale-product-add-btn"
                                       }
-                                      onClick={() => handleAddProductToSale(product)}
+                                      onClick={() =>
+                                        handleAddProductToSale(product)
+                                      }
                                       disabled={getAvailableStock(product) <= 0}
                                     >
-                                      {getAvailableStock(product) <= 0 ? "Sin stock" : "Agregar"}
+                                      {getAvailableStock(product) <= 0
+                                        ? "Sin stock"
+                                        : "Agregar"}
                                     </button>
                                   </div>
                                 ))
                               )}
                             </div>
                           </div>
-
-                          {saleItems.length > 0 && (
-                            <div className="sale-items-table mt-3">
-                              <table className="table table-sm align-middle mb-0">
-                                <thead>
-                                  <tr>
-                                    <th>Producto</th>
-                                    <th>Precio</th>
-                                    <th>Cantidad</th>
-                                    <th>Subtotal</th>
-                                    <th></th>
-                                  </tr>
-                                </thead>
-
-                                <tbody>
-                                  {saleItems.map((item) => (
-                                    <tr key={item.productId}>
-                                      <td className="fw-bold">{item.productName}</td>
-                                      <td>{formatCurrency(item.salePrice)}</td>
-                                      <td>{item.quantity}</td>
-                                      <td>{formatCurrency(item.subtotal)}</td>
-                                      <td className="text-end">
-                                        <button
-                                          type="button"
-                                          className="btn btn-sm btn-outline-danger"
-                                          onClick={() => handleRemoveItem(item.productId)}
-                                        >
-                                          <FaTrash />
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
                         </div>
 
                         <div className="col-12 col-lg-4">
@@ -781,13 +805,19 @@ function Sales() {
                             <div className="sale-total-row">
                               <span>Monto recibido</span>
                               <strong>
-                                {formatCurrency(Number(formData.amountReceived || 0))}
+                                {formatCurrency(
+                                  Number(formData.amountReceived || 0)
+                                )}
                               </strong>
                             </div>
 
                             <div className="sale-total-row">
                               <span>Cambio</span>
-                              <strong className={change < 0 ? "text-danger" : "text-success"}>
+                              <strong
+                                className={
+                                  change < 0 ? "text-danger" : "text-success"
+                                }
+                              >
                                 {formatCurrency(change)}
                               </strong>
                             </div>
@@ -809,6 +839,45 @@ function Sales() {
                                 Cancelar
                               </button>
                             </div>
+
+                            {saleItems.length > 0 && (
+                              <div className="sale-cart-summary mt-4">
+                                <h6>Productos agregados</h6>
+
+                                <div className="sale-cart-items">
+                                  {saleItems.map((item) => (
+                                    <div
+                                      className="sale-cart-item"
+                                      key={item.productId}
+                                    >
+                                      <div>
+                                        <strong>{item.productName}</strong>
+                                        <span>
+                                          {item.quantity} x{" "}
+                                          {formatCurrency(item.salePrice)}
+                                        </span>
+                                      </div>
+
+                                      <div className="sale-cart-item-right">
+                                        <strong>
+                                          {formatCurrency(item.subtotal)}
+                                        </strong>
+
+                                        <button
+                                          type="button"
+                                          className="sale-cart-remove-btn"
+                                          onClick={() =>
+                                            handleRemoveItem(item.productId)
+                                          }
+                                        >
+                                          <FaTrash />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -819,6 +888,7 @@ function Sales() {
             </div>
           </div>
         )}
+
         {loading && <div className="alert alert-info">Cargando ventas...</div>}
 
         {!loading && (
@@ -877,15 +947,21 @@ function Sales() {
                             <div className="sale-id">ID: {sale.id}</div>
                           </td>
 
-                          <td className="sale-total">{formatCurrency(sale.total)}</td>
+                          <td className="sale-total">
+                            {formatCurrency(sale.total)}
+                          </td>
 
                           <td>{getPaymentMethodText(sale.paymentMethod)}</td>
 
                           <td>{getStatusBadge(sale.status)}</td>
 
-                          <td>{sale.userName || sale.user?.name || "Sin usuario"}</td>
+                          <td>
+                            {sale.userName || sale.user?.name || "Sin usuario"}
+                          </td>
 
-                          <td>{formatDate(sale.createdAt || sale.saleDate)}</td>
+                          <td>
+                            {formatDate(sale.createdAt || sale.saleDate)}
+                          </td>
 
                           <td>
                             <div className="sales-action-buttons">
@@ -965,7 +1041,9 @@ function Sales() {
 
                         <p>
                           <strong>Fecha:</strong>{" "}
-                          {formatDate(selectedSale.createdAt || selectedSale.saleDate)}
+                          {formatDate(
+                            selectedSale.createdAt || selectedSale.saleDate
+                          )}
                         </p>
                       </div>
                     </div>
@@ -985,9 +1063,12 @@ function Sales() {
 
                         <tbody>
                           {!selectedSale.details ||
-                            selectedSale.details.length === 0 ? (
+                          selectedSale.details.length === 0 ? (
                             <tr>
-                              <td colSpan="4" className="text-center text-muted">
+                              <td
+                                colSpan="4"
+                                className="text-center text-muted"
+                              >
                                 Esta venta no tiene productos.
                               </td>
                             </tr>
@@ -1013,7 +1094,9 @@ function Sales() {
 
                       <div className="sale-total-row">
                         <span>Monto recibido</span>
-                        <strong>{formatCurrency(selectedSale.amountReceived)}</strong>
+                        <strong>
+                          {formatCurrency(selectedSale.amountReceived)}
+                        </strong>
                       </div>
 
                       <div className="sale-total-row">

@@ -887,3 +887,118 @@
   border-color: #fca5a5;
   opacity: 1;
 }
+
+/* =========================
+   LECTOR CÓDIGO DE BARRAS
+========================= */
+
+.sale-barcode-box {
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.sale-barcode-input-group .input-group-text {
+  border-radius: 16px 0 0 16px;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 18px;
+}
+
+.sale-barcode-input {
+  border-radius: 0 16px 16px 0 !important;
+  background: #ffffff !important;
+  border: 1px solid #bfdbfe !important;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 14px 16px !important;
+}
+
+.sale-barcode-input:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14) !important;
+}
+
+.sale-barcode-help {
+  display: block;
+  color: #64748b;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* =========================
+   CARRITO EN RESUMEN POS
+========================= */
+
+.sale-cart-summary {
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding-top: 18px;
+}
+
+.sale-cart-summary h6 {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  color: #ffffff;
+}
+
+.sale-cart-items {
+  display: grid;
+  gap: 10px;
+  max-height: 270px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sale-cart-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.sale-cart-item strong {
+  display: block;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.sale-cart-item span {
+  display: block;
+  color: #cbd5e1;
+  font-size: 13px;
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+.sale-cart-item-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sale-cart-remove-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: #fee2e2;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.sale-cart-remove-btn:hover {
+  background: #fecaca;
+  transform: translateY(-2px);
+}

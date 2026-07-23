@@ -1002,3 +1002,262 @@
   background: #fecaca;
   transform: translateY(-2px);
 }
+
+/* =========================
+   TICKET DE VENTA - MODAL
+========================= */
+
+.ticket-modal-wrapper {
+  z-index: 3000;
+}
+
+.ticket-modal {
+  border: none;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 25px 70px rgba(15, 23, 42, 0.35);
+}
+
+.ticket-modal .modal-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ticket-modal .modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.ticket-modal .modal-body {
+  padding: 18px;
+  background: #f8fafc;
+}
+
+.ticket-modal .modal-footer {
+  padding: 14px 18px;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.ticket-modal .modal-footer .btn {
+  border-radius: 10px;
+  font-weight: 800;
+  padding: 9px 16px;
+}
+
+/* =========================
+   TICKET INTERNO
+========================= */
+
+.ticket-print-area {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  background: #ffffff;
+  color: #111827;
+  font-family: Arial, sans-serif;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+}
+
+.ticket-header {
+  text-align: center;
+}
+
+.ticket-header h4 {
+  font-size: 24px;
+  font-weight: 900;
+  margin: 0 0 4px;
+  color: #111827;
+}
+
+.ticket-header p {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ticket-header span {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #111827;
+}
+
+.ticket-divider {
+  border-top: 1px dashed #94a3b8;
+  margin: 14px 0;
+}
+
+.ticket-info div,
+.ticket-totals div {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.ticket-info span,
+.ticket-totals span {
+  color: #475569;
+  font-weight: 700;
+  min-width: 70px;
+}
+
+.ticket-info strong,
+.ticket-totals strong {
+  color: #111827;
+  font-weight: 900;
+  text-align: right;
+  word-break: break-word;
+}
+
+.ticket-products {
+  display: grid;
+  gap: 10px;
+}
+
+.ticket-product {
+  padding-bottom: 8px;
+}
+
+.ticket-product:not(:last-child) {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ticket-product-name {
+  font-size: 13px;
+  font-weight: 900;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.ticket-product-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.ticket-product-row strong {
+  color: #111827;
+  font-weight: 900;
+}
+
+.ticket-totals div {
+  margin-bottom: 9px;
+}
+
+.ticket-totals div:first-child {
+  font-size: 15px;
+}
+
+.ticket-totals div:first-child strong {
+  font-size: 16px;
+}
+
+.ticket-totals div:last-child {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.ticket-footer {
+  text-align: center;
+}
+
+.ticket-footer p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #111827;
+}
+
+.ticket-footer small {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* =========================
+   IMPRESIÓN TICKET
+========================= */
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .ticket-print-area,
+  .ticket-print-area * {
+    visibility: visible !important;
+  }
+
+  .ticket-print-area {
+    position: fixed !important;
+    left: 50% !important;
+    top: 8mm !important;
+    transform: translateX(-50%) !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    min-width: 80mm !important;
+    padding: 6mm !important;
+    margin: 0 auto !important;
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-size: 13px !important;
+  }
+
+  .ticket-modal,
+  .ticket-modal .modal-dialog,
+  .ticket-modal .modal-content,
+  .ticket-modal .modal-body {
+    visibility: visible !important;
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .no-print,
+  .modal-backdrop,
+  .ticket-modal .modal-header,
+  .ticket-modal .modal-footer {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .ticket-header h4 {
+    font-size: 22px !important;
+  }
+
+  .ticket-info div,
+  .ticket-totals div,
+  .ticket-product-row {
+    font-size: 13px !important;
+  }
+
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+}

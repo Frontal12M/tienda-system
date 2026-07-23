@@ -47,6 +47,9 @@ function Sales() {
   const [selectedSale, setSelectedSale] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
+  const [ticketSale, setTicketSale] = useState(null);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [productSearchTerm, setProductSearchTerm] = useState("");
   const [selectedQuantities, setSelectedQuantities] = useState({});
@@ -267,8 +270,7 @@ function Sales() {
 
     if (quantity > availableStock) {
       setError(
-        `Stock insuficiente. Solo puedes agregar ${availableStock} ${
-          availableStock === 1 ? "pieza más" : "piezas más"
+        `Stock insuficiente. Solo puedes agregar ${availableStock} ${availableStock === 1 ? "pieza más" : "piezas más"
         } de "${product.name}".`
       );
       return false;
@@ -282,10 +284,10 @@ function Sales() {
         saleItems.map((item) =>
           item.productId === product.id
             ? {
-                ...item,
-                quantity: newQuantity,
-                subtotal: Number(product.salePrice) * newQuantity,
-              }
+              ...item,
+              quantity: newQuantity,
+              subtotal: Number(product.salePrice) * newQuantity,
+            }
             : item
         )
       );
@@ -387,7 +389,36 @@ function Sales() {
 
       console.log("Venta a guardar:", saleToSave);
 
-      await createSale(saleToSave);
+      const data = await createSale(saleToSave);
+      const createdSale = data.responseObject || data;
+
+      let saleForTicket = {
+        ...createdSale,
+        userName: user?.name || "Usuario actual",
+        paymentMethod: formData.paymentMethod,
+        amountReceived: amountReceived,
+        changeAmount: amountReceived - total,
+        total: total,
+        details: saleItems.map((item) => ({
+          id: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: item.salePrice,
+          subtotal: item.subtotal,
+        })),
+      };
+
+      if (createdSale?.id) {
+        try {
+          const detailData = await getSaleById(createdSale.id);
+          saleForTicket = detailData.responseObject || detailData || saleForTicket;
+        } catch (detailError) {
+          console.warn("No se pudo cargar detalle completo del ticket:", detailError);
+        }
+      }
+
+      setTicketSale(saleForTicket);
+      setShowTicketModal(true);
 
       setSuccess("Venta registrada correctamente.");
       resetForm();
@@ -433,6 +464,15 @@ function Sales() {
   const handleCloseDetailModal = () => {
     setSelectedSale(null);
     setShowDetailModal(false);
+  };
+
+  const handleCloseTicketModal = () => {
+    setTicketSale(null);
+    setShowTicketModal(false);
+  };
+
+  const handlePrintTicket = () => {
+    window.print();
   };
 
   const handleCancelSale = async (saleId) => {
@@ -486,9 +526,8 @@ function Sales() {
   });
 
   const filteredSales = sales.filter((sale) => {
-    const text = `${sale.folio || ""} ${sale.userName || ""} ${
-      sale.user?.name || ""
-    } ${getPaymentMethodText(sale.paymentMethod)} ${sale.status || ""}`
+    const text = `${sale.folio || ""} ${sale.userName || ""} ${sale.user?.name || ""
+      } ${getPaymentMethodText(sale.paymentMethod)} ${sale.status || ""}`
       .toLowerCase();
 
     return text.includes(searchTerm.toLowerCase());
@@ -1063,7 +1102,7 @@ function Sales() {
 
                         <tbody>
                           {!selectedSale.details ||
-                          selectedSale.details.length === 0 ? (
+                            selectedSale.details.length === 0 ? (
                             <tr>
                               <td
                                 colSpan="4"
@@ -1125,7 +1164,129 @@ function Sales() {
           </>
         )}
       </div>
+
+      {showTicketModal && ticketSale && (
+        <>
+          <div className="modal fade show d-block ticket-modal-wrapper" tabIndex="-1">
+            <div className="modal-dialog modal-sm modal-dialog-centered">
+              <div className="modal-content ticket-modal">
+                <div className="modal-header no-print">
+                  <h5 className="modal-title">Ticket de venta</h5>
+
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleCloseTicketModal}
+                  ></button>
+                </div>
+
+                <div className="modal-body">
+                  <div className="ticket-print-area">
+                    <div className="ticket-header">
+                      <h4>Tienda</h4>
+                      <p>Sistema POS</p>
+                      <span>Ticket de venta</span>
+                    </div>
+
+                    <div className="ticket-divider"></div>
+
+                    <div className="ticket-info">
+                      <div>
+                        <span>Folio:</span>
+                        <strong>{ticketSale.folio || `VENTA-${ticketSale.id || ""}`}</strong>
+                      </div>
+
+                      <div>
+                        <span>Fecha:</span>
+                        <strong>
+                          {formatDate(ticketSale.createdAt || ticketSale.saleDate || new Date())}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>Cajero:</span>
+                        <strong>{ticketSale.userName || user?.name || "Sin usuario"}</strong>
+                      </div>
+
+                      <div>
+                        <span>Pago:</span>
+                        <strong>{getPaymentMethodText(ticketSale.paymentMethod)}</strong>
+                      </div>
+                    </div>
+
+                    <div className="ticket-divider"></div>
+
+                    <div className="ticket-products">
+                      {(ticketSale.details || []).map((detail, index) => (
+                        <div className="ticket-product" key={detail.id || index}>
+                          <div className="ticket-product-name">
+                            {detail.productName || "Producto"}
+                          </div>
+
+                          <div className="ticket-product-row">
+                            <span>
+                              {detail.quantity} x {formatCurrency(detail.unitPrice)}
+                            </span>
+                            <strong>{formatCurrency(detail.subtotal)}</strong>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="ticket-divider"></div>
+
+                    <div className="ticket-totals">
+                      <div>
+                        <span>Total</span>
+                        <strong>{formatCurrency(ticketSale.total)}</strong>
+                      </div>
+
+                      <div>
+                        <span>Recibido</span>
+                        <strong>{formatCurrency(ticketSale.amountReceived)}</strong>
+                      </div>
+
+                      <div>
+                        <span>Cambio</span>
+                        <strong>{formatCurrency(ticketSale.changeAmount)}</strong>
+                      </div>
+                    </div>
+
+                    <div className="ticket-divider"></div>
+
+                    <div className="ticket-footer">
+                      <p>¡Gracias por su compra!</p>
+                      <small>Conserve su ticket.</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="modal-footer no-print">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handleCloseTicketModal}
+                  >
+                    Cerrar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handlePrintTicket}
+                  >
+                    Imprimir
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="modal-backdrop fade show no-print"></div>
+        </>
+      )}
     </MainLayout>
+
   );
 }
 

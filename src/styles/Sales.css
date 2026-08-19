@@ -1195,7 +1195,28 @@
    IMPRESIÓN TICKET
 ========================= */
 
+/* =========================
+   IMPRESIÓN TICKET
+========================= */
+
 @media print {
+
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 80mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
   body * {
     visibility: hidden !important;
   }
@@ -1206,36 +1227,75 @@
   }
 
   .ticket-print-area {
-    position: fixed !important;
-    left: 50% !important;
-    top: 8mm !important;
-    transform: translateX(-50%) !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+
+    transform: none !important;
+
     width: 80mm !important;
     max-width: 80mm !important;
     min-width: 80mm !important;
-    padding: 6mm !important;
-    margin: 0 auto !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 4mm !important;
+
+    box-sizing: border-box !important;
+
     background: #ffffff !important;
+
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    font-size: 13px !important;
+
+    font-size: 12px !important;
+
+    overflow: visible !important;
+
+    page-break-before: avoid !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+
+    break-before: avoid !important;
+    break-after: avoid !important;
+    break-inside: avoid !important;
   }
 
-  .ticket-modal,
+  .ticket-modal {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
   .ticket-modal .modal-dialog,
   .ticket-modal .modal-content,
   .ticket-modal .modal-body {
-    visibility: visible !important;
     position: static !important;
+
     display: block !important;
+
     width: auto !important;
     max-width: none !important;
-    padding: 0 !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+
     margin: 0 !important;
+    padding: 0 !important;
+
     border: none !important;
     box-shadow: none !important;
+
     background: transparent !important;
+
+    overflow: visible !important;
   }
 
   .no-print,
@@ -1247,18 +1307,24 @@
   }
 
   .ticket-header h4 {
-    font-size: 22px !important;
+    font-size: 20px !important;
+    margin: 0 0 4px !important;
   }
 
   .ticket-info div,
   .ticket-totals div,
   .ticket-product-row {
-    font-size: 13px !important;
+    font-size: 12px !important;
   }
 
-  @page {
-    size: 80mm auto;
-    margin: 0;
+  .ticket-header,
+  .ticket-info,
+  .ticket-products,
+  .ticket-product-row,
+  .ticket-totals,
+  .ticket-footer {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
 

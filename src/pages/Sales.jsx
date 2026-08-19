@@ -501,7 +501,313 @@ function Sales() {
   };
 
   const handlePrintTicket = () => {
-    window.print();
+    if (!ticketSale) return;
+  
+    const printWindow = window.open("", "_blank", "width=420,height=700");
+  
+    if (!printWindow) {
+      setError(
+        "El navegador bloqueó la ventana de impresión. Permite las ventanas emergentes."
+      );
+      return;
+    }
+  
+    const details = ticketSale.details || [];
+  
+    const productsHtml = details
+      .map((detail) => {
+        const quantity = Number(detail.quantity || 0);
+  
+        const unitPrice = Number(
+          detail.unitPrice ||
+          detail.salePrice ||
+          detail.price ||
+          0
+        );
+  
+        const subtotal = Number(
+          detail.subtotal || quantity * unitPrice
+        );
+  
+        return `
+          <div class="product">
+            <div class="product-name">
+              ${detail.productName || "Producto"}
+            </div>
+  
+            <div class="product-row">
+              <span>
+                ${quantity} x ${formatCurrency(unitPrice)}
+              </span>
+  
+              <strong>
+                ${formatCurrency(subtotal)}
+              </strong>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  
+    const folio =
+      ticketSale.folio ||
+      `VENTA-${ticketSale.id || ""}`;
+  
+    const date = formatDate(
+      ticketSale.createdAt ||
+      ticketSale.saleDate ||
+      new Date()
+    );
+  
+    const cashier =
+      ticketSale.userName ||
+      user?.name ||
+      "Sin usuario";
+  
+    const payment =
+      getPaymentMethodText(ticketSale.paymentMethod);
+  
+    const totalTicket =
+      Number(ticketSale.total || 0);
+  
+    const amountReceived =
+      Number(ticketSale.amountReceived || 0);
+  
+    const changeAmount =
+      Number(ticketSale.changeAmount || 0);
+  
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="es">
+        <head>
+          <meta charset="UTF-8" />
+  
+          <title>Ticket ${folio}</title>
+  
+          <style>
+  
+            @page {
+              size: 80mm auto;
+              margin: 0;
+            }
+  
+            * {
+              box-sizing: border-box;
+            }
+  
+            html,
+            body {
+              margin: 0;
+              padding: 0;
+              width: 80mm;
+              background: #ffffff;
+              color: #000000;
+              font-family: Arial, Helvetica, sans-serif;
+            }
+  
+            body {
+              padding: 3mm;
+            }
+  
+            .ticket {
+              width: 74mm;
+              margin: 0 auto;
+              padding: 0;
+            }
+  
+            .header {
+              text-align: center;
+            }
+  
+            .header h1 {
+              margin: 0;
+              font-size: 20px;
+              font-weight: 900;
+            }
+  
+            .header p {
+              margin: 3px 0 0;
+              font-size: 12px;
+            }
+  
+            .header .title {
+              display: block;
+              margin-top: 8px;
+              font-size: 12px;
+              font-weight: 900;
+            }
+  
+            .divider {
+              border-top: 1px dashed #000;
+              margin: 10px 0;
+            }
+  
+            .info-row,
+            .total-row {
+              display: flex;
+              justify-content: space-between;
+              gap: 8px;
+              margin-bottom: 6px;
+              font-size: 12px;
+            }
+  
+            .info-row span,
+            .total-row span {
+              flex-shrink: 0;
+            }
+  
+            .info-row strong,
+            .total-row strong {
+              text-align: right;
+              word-break: break-word;
+            }
+  
+            .product {
+              margin-bottom: 8px;
+            }
+  
+            .product-name {
+              font-size: 12px;
+              font-weight: 900;
+              margin-bottom: 3px;
+            }
+  
+            .product-row {
+              display: flex;
+              justify-content: space-between;
+              gap: 8px;
+              font-size: 12px;
+            }
+  
+            .total-row.total {
+              font-size: 15px;
+              font-weight: 900;
+              margin-top: 3px;
+            }
+  
+            .total-row.change {
+              border-top: 1px solid #000;
+              padding-top: 7px;
+              margin-top: 7px;
+            }
+  
+            .footer {
+              text-align: center;
+              margin-top: 10px;
+            }
+  
+            .footer strong {
+              display: block;
+              font-size: 13px;
+            }
+  
+            .footer span {
+              display: block;
+              font-size: 11px;
+              margin-top: 3px;
+            }
+  
+            @media print {
+  
+              html,
+              body {
+                width: 80mm;
+                height: auto;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+  
+              body {
+                padding: 3mm !important;
+              }
+  
+              .ticket {
+                width: 74mm;
+              }
+            }
+  
+          </style>
+        </head>
+  
+        <body>
+  
+          <div class="ticket">
+  
+            <div class="header">
+              <h1>Tienda</h1>
+              <p>Sistema POS</p>
+              <span class="title">TICKET DE VENTA</span>
+            </div>
+  
+            <div class="divider"></div>
+  
+            <div class="info-row">
+              <span>Folio:</span>
+              <strong>${folio}</strong>
+            </div>
+  
+            <div class="info-row">
+              <span>Fecha:</span>
+              <strong>${date}</strong>
+            </div>
+  
+            <div class="info-row">
+              <span>Cajero:</span>
+              <strong>${cashier}</strong>
+            </div>
+  
+            <div class="info-row">
+              <span>Pago:</span>
+              <strong>${payment}</strong>
+            </div>
+  
+            <div class="divider"></div>
+  
+            ${productsHtml}
+  
+            <div class="divider"></div>
+  
+            <div class="total-row total">
+              <span>TOTAL</span>
+              <strong>${formatCurrency(totalTicket)}</strong>
+            </div>
+  
+            <div class="total-row">
+              <span>Recibido</span>
+              <strong>${formatCurrency(amountReceived)}</strong>
+            </div>
+  
+            <div class="total-row change">
+              <span>Cambio</span>
+              <strong>${formatCurrency(changeAmount)}</strong>
+            </div>
+  
+            <div class="divider"></div>
+  
+            <div class="footer">
+              <strong>¡Gracias por su compra!</strong>
+              <span>Conserve su ticket.</span>
+            </div>
+  
+          </div>
+  
+          <script>
+            window.onload = function () {
+              setTimeout(function () {
+                window.print();
+              }, 300);
+            };
+  
+            window.onafterprint = function () {
+              window.close();
+            };
+          <\/script>
+  
+        </body>
+      </html>
+    `);
+  
+    printWindow.document.close();
   };
 
   const handleCancelSale = async (saleId) => {

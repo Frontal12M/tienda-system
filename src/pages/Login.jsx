@@ -35,15 +35,25 @@ function Login() {
 
       localStorage.setItem("authData", JSON.stringify(userData));
       localStorage.setItem("user", JSON.stringify(userData));
-      
+
       if (userData.token) {
         localStorage.setItem("token", userData.token);
       }
-      
+
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error en login:", error);
-      setError("Usuario o contraseña incorrectos");
+      console.error("Error completo en login:", error);
+      console.error("Status:", error.response?.status);
+      console.error("Data:", error.response?.data);
+      console.error("Message:", error.message);
+
+      const message =
+        error.response?.data?.responseString ||
+        error.response?.data?.message ||
+        error.message ||
+        "Error al iniciar sesión";
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -60,6 +70,7 @@ function Login() {
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label className="form-label">Usuario</label>
+
             <input
               type="text"
               name="username"
@@ -74,6 +85,7 @@ function Login() {
 
           <div className="mb-3">
             <label className="form-label">Contraseña</label>
+
             <input
               type="password"
               name="password"
@@ -86,7 +98,11 @@ function Login() {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-primary w-100"
+            disabled={loading}
+          >
             {loading ? "Ingresando..." : "Iniciar sesión"}
           </button>
         </form>

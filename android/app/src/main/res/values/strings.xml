@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Tienda POS</string>
+    <string name="title_activity_main">Tienda POS</string>
+    <string name="package_name">com.tienda.pos</string>
+    <string name="custom_url_scheme">com.tienda.pos</string>
+</resources>
